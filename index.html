@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Xtream IPTV Player</title>
+    <title>BABA ÖZKAN PLAYER</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -25,7 +25,7 @@
         }
         .screen.active { display: flex; }
 
-        /* ========== FOCUS STİLLERİ (KUMANDA) ========== */
+        /* ========== FOCUS STİLLERİ ========== */
         button:focus,
         .cat-item:focus,
         .stream-item:focus,
@@ -35,17 +35,16 @@
         .fav-item:focus,
         input:focus,
         .fav-star:focus,
-        .search-input:focus {
+        .search-input:focus,
+        .delete-panel-btn:focus,
+        .cat-search-input:focus,
+        .close-app-btn:focus,
+        .menu-btn:focus {
             outline: none !important;
             border: 4px solid #ff0 !important;
             box-shadow: 0 0 18px 6px rgba(255,255,0,0.8) !important;
             z-index: 5;
             position: relative;
-        }
-        .menu-btn:focus {
-            outline: none !important;
-            border: 5px solid #ff0 !important;
-            box-shadow: 0 0 25px 10px rgba(255,255,0,0.9) !important;
         }
         .ctrl-btn:focus,
         .back-btn:focus,
@@ -62,41 +61,185 @@
         }
 
         /* ========== LOGIN ========== */
-        #loginScreen.active { justify-content: center; align-items: center; }
-        .login-container {
-            background: #1a1a1a; padding: 45px; border-radius: 10px;
-            display: flex; flex-direction: column; width: 560px; max-width: 92vw;
+        #loginScreen.active {
+            justify-content: center;
+            align-items: center;
+            flex-direction: row;
+            flex-wrap: wrap;
+            padding: 20px;
         }
-        .login-container h2 { text-align: center; margin-bottom: 35px; font-size: 42px; color: #f0c040; }
+        .login-wrapper {
+            display: flex;
+            flex-direction: row;
+            gap: 30px;
+            align-items: flex-start;
+            justify-content: center;
+            width: 100%;
+            max-width: 1200px;
+        }
+        .login-container {
+            background: #1a1a1a;
+            padding: 35px 30px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            width: 480px;
+            max-width: 45vw;
+            flex-shrink: 0;
+        }
+        .login-container h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 38px;
+            color: #f0c040;
+        }
         .login-container input {
-            margin-bottom: 18px; padding: 18px; font-size: 27px;
-            background: #2a2a2a; border: 2px solid #444; color: #fff; border-radius: 6px; outline: none;
+            margin-bottom: 14px;
+            padding: 16px;
+            font-size: 25px;
+            background: #2a2a2a;
+            border: 2px solid #444;
+            color: #fff;
+            border-radius: 6px;
+            outline: none;
         }
         .login-container input:focus { border-color: #f0c040; }
         .login-container button {
-            margin-bottom: 18px; padding: 18px; font-size: 27px;
-            background: #f0c040; color: #000; border: none; cursor: pointer; font-weight: bold; margin-top: 12px; border-radius: 6px;
+            margin-bottom: 14px;
+            padding: 16px;
+            font-size: 25px;
+            background: #f0c040;
+            color: #000;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+            border-radius: 6px;
         }
-        .login-container .error-msg { color: #ff5c5c; text-align: center; margin-top: 12px; font-size: 22px; min-height: 24px; }
+        .login-container .error-msg {
+            color: #ff5c5c;
+            text-align: center;
+            margin-top: 10px;
+            font-size: 20px;
+            min-height: 22px;
+        }
 
         .saved-panels {
-            margin-top: 24px; background: #1a1a1a; padding: 20px; border-radius: 10px;
-            width: 560px; max-width: 92vw; max-height: 240px; overflow-y: auto;
+            background: #1a1a1a;
+            padding: 25px;
+            border-radius: 10px;
+            width: 500px;
+            max-width: 45vw;
+            max-height: 70vh;
+            overflow-y: auto;
+            flex-shrink: 0;
         }
-        .saved-panels h3 { color: #f0c040; margin-bottom: 12px; font-size: 30px; }
+        .saved-panels h3 {
+            color: #f0c040;
+            margin-bottom: 15px;
+            font-size: 28px;
+            text-align: center;
+        }
         .saved-panel-item {
-            padding: 16px; border-bottom: 2px solid #333; cursor: pointer; font-size: 24px;
+            padding: 12px 14px;
+            border-bottom: 2px solid #333;
+            cursor: pointer;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-radius: 6px;
+            margin-bottom: 4px;
         }
         .saved-panel-item:hover { background: #333; }
-
-        /* ========== ANA MENÜ ========== */
-        #mainMenuScreen.active { flex-direction: row; flex-wrap: wrap; justify-content: center; align-items: center; }
-        .menu-btn {
-            background: #2a2a2a; border: 3px solid #555; color: #fff;
-            font-size: 38px; padding: 50px 40px; margin: 20px; cursor: pointer;
-            border-radius: 10px; min-width: 240px; text-align: center; transition: background 0.2s;
+        .saved-panel-info { flex: 1; }
+        .delete-panel-btn {
+            background: #c0392b;
+            border: 2px solid #e74c3c;
+            color: #fff;
+            padding: 6px 14px;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 6px;
+            margin-left: 10px;
+            white-space: nowrap;
         }
-        .menu-btn:hover { background: #3a3a3a; border-color: #f0c040; }
+        .delete-panel-btn:hover { background: #e74c3c; }
+
+        /* ========== ANA MENÜ - YENİ TASARIM ========== */
+        #mainMenuScreen.active {
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 50px 20px;
+        }
+        
+        .menu-header {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .menu-title {
+            font-size: 56px;
+            font-weight: bold;
+            color: #f0c040;
+            text-shadow: 3px 3px 8px rgba(0,0,0,0.7);
+            letter-spacing: 3px;
+        }
+        .menu-subtitle {
+            font-size: 22px;
+            color: #ff6b6b;
+            margin-top: 10px;
+            font-style: italic;
+            letter-spacing: 1px;
+        }
+        
+        .menu-buttons-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            padding: 20px;
+        }
+        .menu-btn {
+            background: #1e1e1e;
+            border: 2px solid #555;
+            color: #fff;
+            font-size: 36px;
+            font-weight: bold;
+            padding: 50px 40px;
+            cursor: pointer;
+            border-radius: 16px;
+            min-width: 230px;
+            text-align: center;
+            transition: all 0.2s ease;
+            letter-spacing: 1px;
+        }
+        .menu-btn:hover { 
+            background: #2a2a2a; 
+            border-color: #f0c040;
+        }
+        
+        .menu-footer {
+            margin-bottom: 30px;
+        }
+        .close-app-btn {
+            background: transparent;
+            border: 2px solid #666;
+            color: #999;
+            font-size: 20px;
+            padding: 14px 35px;
+            cursor: pointer;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+            font-weight: normal;
+            letter-spacing: 1px;
+        }
+        .close-app-btn:hover {
+            background: rgba(231, 76, 60, 0.15);
+            border-color: #e74c3c;
+            color: #e74c3c;
+        }
 
         /* ========== LİSTE EKRANI ========== */
         #listScreen.active { flex-direction: row; align-items: stretch; justify-content: flex-start; }
@@ -112,6 +255,25 @@
             border-bottom: 3px solid #333; flex-shrink: 0;
         }
         .sidebar-panel-btn:hover { background: #3a3a3a; }
+        
+        .cat-search-row {
+            padding: 12px 14px;
+            background: #181818;
+            border-bottom: 2px solid #333;
+            flex-shrink: 0;
+        }
+        .cat-search-input {
+            width: 100%;
+            padding: 12px 14px;
+            font-size: 22px;
+            background: #2a2a2a;
+            border: 2px solid #444;
+            color: #fff;
+            border-radius: 6px;
+            outline: none;
+        }
+        .cat-search-input::placeholder { color: #888; font-size: 20px; }
+        
         .sidebar-cats { flex: 1; overflow-y: auto; }
         .sidebar .cat-item {
             padding: 24px 20px; cursor: pointer; border-bottom: 2px solid #2a2a2a;
@@ -240,33 +402,53 @@
 <div id="app">
     <!-- ==================== LOGIN ==================== -->
     <div id="loginScreen" class="screen active">
-        <div class="login-container">
-            <h2>XTREAM IPTV</h2>
-            <input type="text" id="panelNameInput" placeholder="Panel Adı (Abonelik İsmi)" tabindex="0">
-            <input type="text" id="serverInput" placeholder="Sunucu Adresi (http://server:port)" tabindex="0">
-            <input type="text" id="usernameInput" placeholder="Kullanıcı Adı" tabindex="0">
-            <input type="password" id="passwordInput" placeholder="Şifre" tabindex="0">
-            <button id="loginBtn" tabindex="0">GİRİŞ YAP ve KAYDET</button>
-            <div class="error-msg" id="loginError"></div>
-        </div>
-        <div class="saved-panels" id="savedPanelsContainer">
-            <h3>📋 Kayıtlı Panellerim</h3>
-            <div id="savedPanelsList"></div>
+        <div class="login-wrapper">
+            <div class="login-container">
+                <h2>BABA ÖZKAN PLAYER</h2>
+                <input type="text" id="panelNameInput" placeholder="Panel Adı (Abonelik İsmi)" tabindex="0">
+                <input type="text" id="serverInput" placeholder="Sunucu Adresi (http://server:port)" tabindex="0">
+                <input type="text" id="usernameInput" placeholder="Kullanıcı Adı" tabindex="0">
+                <input type="password" id="passwordInput" placeholder="Şifre" tabindex="0">
+                <button id="loginBtn" tabindex="0">GİRİŞ YAP ve KAYDET</button>
+                <div class="error-msg" id="loginError"></div>
+            </div>
+            
+            <div class="saved-panels" id="savedPanelsContainer">
+                <h3>📋 Kayıtlı Panellerim</h3>
+                <div id="savedPanelsList"></div>
+            </div>
         </div>
     </div>
 
     <!-- ==================== ANA MENÜ ==================== -->
     <div id="mainMenuScreen" class="screen">
-        <button class="menu-btn" data-target="live" tabindex="0">📺 CANLI TV</button>
-        <button class="menu-btn" data-target="vod" tabindex="0">🎬 SİNEMA (VOD)</button>
-        <button class="menu-btn" data-target="series" tabindex="0">📚 DİZİLER</button>
-        <button class="menu-btn" id="favMenuBtn" tabindex="0">⭐ FAVORİLERİM</button>
+        <!-- ÜST BAŞLIK -->
+        <div class="menu-header">
+            <div class="menu-title">BABA ÖZKAN PLAYER</div>
+            <div class="menu-subtitle">✦ Kesintisiz İzle, Keyfine Bak! ✦</div>
+        </div>
+        
+        <!-- ORTA BUTONLAR -->
+        <div class="menu-buttons-row">
+            <button class="menu-btn" data-target="live" tabindex="0">📺<br>CANLI TV</button>
+            <button class="menu-btn" data-target="vod" tabindex="0">🎬<br>SİNEMA</button>
+            <button class="menu-btn" data-target="series" tabindex="0">📚<br>DİZİLER</button>
+            <button class="menu-btn" id="favMenuBtn" tabindex="0">⭐<br>FAVORİLER</button>
+        </div>
+        
+        <!-- ALT KAPATMA BUTONU -->
+        <div class="menu-footer">
+            <button class="close-app-btn" id="closeAppBtn" tabindex="0">✕ UYGULAMAYI KAPAT</button>
+        </div>
     </div>
 
     <!-- ==================== LİSTE EKRANI ==================== -->
     <div id="listScreen" class="screen">
         <div class="sidebar" id="categorySidebar">
             <button class="sidebar-panel-btn" id="sidebarPanelBtn" tabindex="0">🔌 PANELLERİM / ÇIKIŞ</button>
+            <div class="cat-search-row">
+                <input type="text" class="cat-search-input" id="catSearchInput" placeholder="🔍 Kategori Ara..." tabindex="0">
+            </div>
             <div class="sidebar-cats" id="sidebarCats"></div>
         </div>
         <div class="content-panel">
@@ -369,6 +551,7 @@
     var speedApplyTimer = null;
 
     var favorites = [];
+    var allCategories = [];
 
     // ==================== YARDIMCI FONKSİYONLAR ====================
     function getEl(id) { return document.getElementById(id); }
@@ -440,7 +623,7 @@
         if (!container) container = document;
         var els = container.querySelectorAll(
             'button, .cat-item, .stream-item, .episode-item, .season-box, .saved-panel-item, ' +
-            '.fav-item, .fav-star, input:not([type="hidden"]), .progress-bar, .menu-btn, .ctrl-btn, .back-btn, .home-btn, .back-btn-text, .sidebar-panel-btn'
+            '.fav-item, .fav-star, input:not([type="hidden"]), .progress-bar, .menu-btn, .ctrl-btn, .back-btn, .home-btn, .back-btn-text, .sidebar-panel-btn, .delete-panel-btn, .close-app-btn'
         );
         var result = [];
         for (var i = 0; i < els.length; i++) {
@@ -522,6 +705,18 @@
         renderSavedPanels();
     }
 
+    function deletePanel(panelName) {
+        var panels = loadSavedPanels();
+        var newPanels = [];
+        for (var i = 0; i < panels.length; i++) {
+            if (panels[i].name !== panelName) {
+                newPanels.push(panels[i]);
+            }
+        }
+        localStorage.setItem('iptv_panels', JSON.stringify(newPanels));
+        renderSavedPanels();
+    }
+
     function renderSavedPanels() {
         var container = getEl('savedPanelsList');
         if (!container) return;
@@ -529,7 +724,7 @@
         var panels = loadSavedPanels();
         if (panels.length === 0) {
             var emptyDiv = document.createElement('div');
-            emptyDiv.style.cssText = 'padding:12px;color:#888;';
+            emptyDiv.style.cssText = 'padding:12px;color:#888;text-align:center;';
             emptyDiv.textContent = 'Henüz kayıtlı panel yok.';
             container.appendChild(emptyDiv);
             return;
@@ -539,7 +734,32 @@
                 var div = document.createElement('div');
                 div.className = 'saved-panel-item';
                 div.setAttribute('tabindex', '0');
-                div.textContent = panel.name + ' (' + panel.server + ')';
+                
+                var infoSpan = document.createElement('span');
+                infoSpan.className = 'saved-panel-info';
+                infoSpan.textContent = panel.name + ' (' + panel.server + ')';
+                div.appendChild(infoSpan);
+                
+                var deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-panel-btn';
+                deleteBtn.setAttribute('tabindex', '0');
+                deleteBtn.textContent = '🗑 Sil';
+                deleteBtn.onclick = function(e) {
+                    e.stopPropagation();
+                    if (confirm('"' + panel.name + '" panelini silmek istediğinize emin misiniz?')) {
+                        deletePanel(panel.name);
+                    }
+                };
+                deleteBtn.onkeydown = function(e) {
+                    if (e.keyCode === 13) {
+                        e.stopPropagation();
+                        if (confirm('"' + panel.name + '" panelini silmek istediğinize emin misiniz?')) {
+                            deletePanel(panel.name);
+                        }
+                    }
+                };
+                div.appendChild(deleteBtn);
+                
                 div.onclick = function() {
                     getEl('panelNameInput').value = panel.name;
                     getEl('serverInput').value = panel.server;
@@ -548,6 +768,7 @@
                     doLogin();
                 };
                 div.onkeydown = function(e) { if (e.keyCode === 13) div.onclick(); };
+                
                 container.appendChild(div);
             })(panels[i]);
         }
@@ -633,6 +854,14 @@
         setTimeout(autoFocusFirst, 150);
     }
 
+    function closeApplication() {
+        if (confirm('Uygulamayı kapatmak istediğinize emin misiniz?')) {
+            try { window.close(); } catch(e) {}
+            try { window.location.href = 'about:blank'; } catch(e) {}
+            logoutToLogin();
+        }
+    }
+
     // ==================== ANA MENÜ ====================
     function onMainMenuClick(target) {
         if (target === 'fav') { showFavoritesScreen(); return; }
@@ -640,7 +869,9 @@
         currentCategoryId = '';
         currentPage = 1;
         streamList = []; filteredStreamList = []; isSearchActive = false;
+        allCategories = [];
         var si = getEl('searchInput'); if (si) si.value = '';
+        var catSi = getEl('catSearchInput'); if (catSi) catSi.value = '';
         historyStack = ['main_menu'];
         if (target === 'live') loadCategories('get_live_categories', 'Canlı TV Kategorileri');
         else if (target === 'vod') loadCategories('get_vod_categories', 'VOD Kategorileri');
@@ -655,22 +886,50 @@
         getEl('pagination').innerHTML = '';
         var url = API_BASE_URL + '&action=' + action;
         ajaxGet(url, function(data) {
-            var cats = data || [];
-            var sidebarCats = getEl('sidebarCats');
-            for (var i = 0; i < cats.length; i++) {
-                var cat = cats[i];
-                var div = document.createElement('div');
-                div.className = 'cat-item';
-                div.setAttribute('tabindex', '0');
-                div.textContent = cat.category_name;
-                div.setAttribute('data-cat-id', cat.category_id);
-                div.onclick = (function(id, name) { return function() { selectCategory(id, name); }; })(cat.category_id, cat.category_name);
-                div.onkeydown = (function(id, name) { return function(e) { if(e.keyCode===13) selectCategory(id, name); }; })(cat.category_id, cat.category_name);
-                sidebarCats.appendChild(div);
-            }
-            if (cats.length > 0) selectCategory(cats[0].category_id, cats[0].category_name);
+            allCategories = data || [];
+            renderCategories(allCategories);
+            if (allCategories.length > 0) selectCategory(allCategories[0].category_id, allCategories[0].category_name);
             setTimeout(autoFocusFirst, 100);
         });
+    }
+    
+    function filterCategories(searchText) {
+        if (!searchText || searchText.trim() === '') {
+            renderCategories(allCategories);
+            return;
+        }
+        var query = searchText.toLowerCase();
+        var filtered = [];
+        for (var i = 0; i < allCategories.length; i++) {
+            var catName = (allCategories[i].category_name || '').toLowerCase();
+            if (catName.indexOf(query) !== -1) {
+                filtered.push(allCategories[i]);
+            }
+        }
+        renderCategories(filtered);
+    }
+    
+    function renderCategories(cats) {
+        var sidebarCats = getEl('sidebarCats');
+        sidebarCats.innerHTML = '';
+        if (cats.length === 0) {
+            var emptyDiv = document.createElement('div');
+            emptyDiv.style.cssText = 'padding:20px;color:#888;text-align:center;';
+            emptyDiv.textContent = 'Kategori bulunamadı.';
+            sidebarCats.appendChild(emptyDiv);
+            return;
+        }
+        for (var i = 0; i < cats.length; i++) {
+            var cat = cats[i];
+            var div = document.createElement('div');
+            div.className = 'cat-item';
+            div.setAttribute('tabindex', '0');
+            div.textContent = cat.category_name;
+            div.setAttribute('data-cat-id', cat.category_id);
+            div.onclick = (function(id, name) { return function() { selectCategory(id, name); }; })(cat.category_id, cat.category_name);
+            div.onkeydown = (function(id, name) { return function(e) { if(e.keyCode===13) selectCategory(id, name); }; })(cat.category_id, cat.category_name);
+            sidebarCats.appendChild(div);
+        }
     }
 
     function selectCategory(catId, catName) {
@@ -950,6 +1209,8 @@
         getEl('episodesBackBtn').onclick = function() { goBack(); };
         getEl('sidebarPanelBtn').onclick = function() { logoutToLogin(); };
         getEl('favMenuBtn').addEventListener('click', function() { onMainMenuClick('fav'); });
+        getEl('closeAppBtn').addEventListener('click', function() { closeApplication(); });
+        getEl('closeAppBtn').addEventListener('keydown', function(e) { if(e.keyCode === 13) closeApplication(); });
     }
 
     function bindGlobalKeyboard() {
@@ -975,6 +1236,12 @@
         if (searchInput) {
             searchInput.oninput = function() { performSearch(this.value); };
             searchInput.onkeydown = function(e) { if (e.keyCode === 13) { performSearch(this.value); setTimeout(autoFocusFirst, 100); } };
+        }
+        
+        var catSearchInput = getEl('catSearchInput');
+        if (catSearchInput) {
+            catSearchInput.oninput = function() { filterCategories(this.value); };
+            catSearchInput.onkeydown = function(e) { if (e.keyCode === 13) { filterCategories(this.value); } };
         }
     }
 
