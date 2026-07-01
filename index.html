@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ES5 Xtream IPTV Player</title>
+    <style>
+        /* CSS RESET & TEMEL AYARLAR */
+        * {
+            margin: 0;
+            padding: 0;
+            -webkit-box-sizing: border-box;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #0a0a0a;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            overflow: hidden; /* TV'de scroll çubuğu istenmez */
+            width: 100vw;
+            height: 100vh;
+            font-size: 22px; /* TV için büyük font */
+        }
+
+        /* ODAK (FOCUS) GÖRÜNÜMÜ - TV Kumandası için kritik */
+        .focused {
+            background-color: #d32f2f !important;
+            color: #ffffff !important;
+            border: 3px solid #ffffff !important;
+            outline: none;
+            -webkit-transform: scale(1.02);
+            transform: scale(1.02);
+            z-index: 10;
+        }
+
+        /* EKRANLAR */
+        #login-screen, #app-screen, #player-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+        }
+
+        /* --- GİRİŞ EKRANI TASARIMI --- */
+        #login-screen {
+            background-color: #111111;
+        }
+        .login-box {
+            width: 600px;
+            margin: 100px auto 0 auto;
+            background-color: #222222;
+            padding: 40px;
+            border-radius: 10px;
+            border: 2px solid #444;
+        }
+        .login-box h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 36px;
+            color: #e50914;
+        }
+        .login-group {
+            margin-bottom: 20px;
+        }
+        .login-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #aaaaaa;
+        }
+        .login-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 24px;
+            background-color: #333333;
+            color: #ffffff;
+            border: 2px solid #555555;
+            border-radius: 5px;
+        }
+        #btn-login {
+            width: 100%;
+            padding: 20px;
+            font-size: 28px;
+            background-color: #e50914;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        #login-error {
+            color: #ff4444;
+            text-align: center;
+            margin-top: 20px;
+            font-weight: bold;
+            display: none;
+        }
+
+        /* --- ANA UYGULAMA EKRANI TASARIMI (FLOAT İLE) --- */
+        .panel {
+            float: left;
+            height: 100%;
+            overflow: hidden;
+        }
+        #menu-panel {
+            width: 20%;
+            background-color: #141414;
+            border-right: 2px solid #333;
+        }
+        #category-panel {
+            width: 30%;
+            background-color: #1a1a1a;
+            border-right: 2px solid #333;
+        }
+        #content-panel {
+            width: 50%;
+            background-color: #0f0f0f;
+            position: relative;
+        }
+        .panel-header {
+            padding: 20px;
+            background-color: #000000;
+            border-bottom: 2px solid #333;
+            font-weight: bold;
+            font-size: 26px;
+            text-align: center;
+        }
+        .list-container {
+            height: calc(100% - 70px);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* LİSTE ÖĞELERİ */
+        .menu-item, .category-item, .content-item {
+            padding: 20px;
+            border-bottom: 1px solid #2a2a2a;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
+            border: 3px solid transparent;
+        }
+        .menu-item { text-align: center; font-size: 28px; padding: 40px 20px; }
+        
+        /* Sayfalama Bilgisi */
+        #pagination-info {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 18px;
+            color: #888;
+            background: #000;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        /* --- VİDEO OYNATICI TASARIMI --- */
+        #player-screen {
+            background-color: #000000;
+            z-index: 100;
+        }
+        #video-player {
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+        }
+        #player-ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: rgba(0,0,0,0.7);
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+        #player-error-msg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            -webkit-transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%);
+            background-color: rgba(200, 0, 0, 0.9);
+            color: #fff;
+            padding: 30px;
+            font-size: 32px;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+            z-index: 101;
+        }
+        
+        /* Loading Bildirimi */
+        #loading-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            -webkit-transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%);
+            background-color: rgba(0,0,0,0.8);
+            padding: 20px 40px;
+            font-size: 28px;
+            border: 2px solid #555;
+            border-radius: 10px;
+            display: none;
+            z-index: 999;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loading-indicator">Yükleniyor... Lütfen Bekleyin</div>
+
+    <div id="login-screen">
+        <div class="login-box">
+            <h1>IPTV PLAYER</h1>
+            <div class="login-group">
+                <label>Sunucu Adresi (Örn: http://domain.com:8080)</label>
+                <input type="text" id="input-url" class="login-input" placeholder="http://...">
+            </div>
+            <div class="login-group">
+                <label>Kullanıcı Adı</label>
+                <input type="text" id="input-user" class="login-input" placeholder="Kullanıcı Adı">
+            </div>
+            <div class="login-group">
+                <label>Şifre</label>
+                <input type="password" id="input-pass" class="login-input" placeholder="Şifre">
+            </div>
+            <button id="btn-login">Giriş Yap</button>
+            <div id="login-error">Giriş Başarısız! Bilgileri Kontrol Edin.</div>
+        </div>
+    </div>
+
+    <div id="app-screen">
+        <div id="menu-panel" class="panel">
+            <div class="panel-header">MENÜ</div>
+            <div class="list-container" id="menu-list">
+                <div class="menu-item" id="menu-live" data-type="live">CANLI TV</div>
+                <div class="menu-item" id="menu-vod" data-type="vod">SİNEMA (VOD)</div>
+                <div class="menu-item" id="menu-series" data-type="series">DİZİLER</div>
+            </div>
+        </div>
+
+        <div id="category-panel" class="panel">
+            <div class="panel-header">KATEGORİLER</div>
+            <div class="list-container" id="category-list">
+                </div>
+        </div>
+
+        <div id="content-panel" class="panel">
+            <div class="panel-header" id="content-header">İÇERİKLER</div>
+            <div class="list-container" id="content-list">
+                </div>
+            <div id="pagination-info">Sayfa: 0/0</div>
+        </div>
+    </div>
+
+    <div id="player-screen">
+        <div id="player-ui">Durduruldu / Oynatılıyor</div>
+        <div id="player-error-msg">Yayın formatı TV tarafından desteklenmiyor veya Bağlantı Hatası.</div>
+        <video id="video-player" controls preload="auto"></video>
+    </div>
+
+    <script>
+        /* =========================================================================
+           BÖLÜM 1: KÜRESEL DEĞİŞKENLER VE DURUM (STATE) YÖNETİMİ
+           ========================================================================= */
+        
+        // CORS proxy ihtiyacı olursa buraya URL girilebilir. Örn: "https://cors-anywhere.herokuapp.com/"
+        var PROXY_URL = ""; 
+
+        var xtreamConfig = {
+            url: "",
+            username: "",
+            password: ""
+        };
+
+        var appState = {
+            activeSection: "login", // login, menu, categories, content, player
+            currentMenuType: "live", // live, vod, series
+            
+            // Tüm çekilen verileri RAM'de ham obje olarak tutuyoruz (DOM'a basmıyoruz)
+            allCategories: [],
+            allContents: [],
+            
+            // Sayfalama (Pagination) Ayarları (ÇÖKME KORUMASI)
+            pageLimit: 20, 
+            currentPage: 0,
+            
+            // Seçili öğelerin index'leri
+            loginIndex: 0,
+            menuIndex: 0,
+            categoryIndex: 0,
+            contentIndex: 0,
+
+            selectedCategoryId: null
+        };
+
+        var loginInputs = ["input-url", "input-user", "input-pass", "btn-login"];
+        var menuItems = ["menu-live", "menu-vod", "menu-series"];
+
+        /* =========================================================================
+           BÖLÜM 2: YARDIMCI FONKSİYONLAR (DOM, ODAK VE YÜKLEME)
+           ========================================================================= */
+
+        function showElement(id) { document.getElementById(id).style.display = "block"; }
+        function hideElement(id) { document.getElementById(id).style.display = "none"; }
+        
+        function showLoading() { showElement("loading-indicator"); }
+        function hideLoading() { hideElement("loading-indicator"); }
+
+        // Odak (Focus) yönetimini CSS sınıfı ekleyip çıkararak yapıyoruz.
+        function clearFocus() {
+            var focusedItems = document.querySelectorAll(".focused");
+            for (var i = 0; i < focusedItems.length; i++) {
+                focusedItems[i].className = focusedItems[i].className.replace(" focused", "");
+            }
+        }
+
+        function setFocus(elementId) {
+            clearFocus();
+            var el = document.getElementById(elementId);
+            if (el) {
+                el.className += " focused";
+                // Eski cihazlarda scroll hizalamak için:
+                if(el.scrollIntoView) {
+                    el.scrollIntoView({block: "center", behavior: "smooth"});
+                }
+            }
+        }
+
+        function updateUIVisibility() {
+            hideElement("login-screen");
+            hideElement("app-screen");
+            hideElement("player-screen");
+
+            if (appState.activeSection === "login") showElement("login-screen");
+            else if (appState.activeSection === "player") showElement("player-screen");
+            else showElement("app-screen");
+        }
+
+        function restoreLoginData() {
+            if (localStorage.getItem("xt_url")) {
+                document.getElementById("input-url").value = localStorage.getItem("xt_url");
+                document.getElementById("input-user").value = localStorage.getItem("xt_user");
+                document.getElementById("input-pass").value = localStorage.getItem("xt_pass");
+            }
+        }
+
+        function saveLoginData() {
+            localStorage.setItem("xt_url", xtreamConfig.url);
+            localStorage.setItem("xt_user", xtreamConfig.username);
+            localStorage.setItem("xt_pass", xtreamConfig.password);
+        }
+
+        /* =========================================================================
+           BÖLÜM 3: XTREAM API İSTEKLERİ (ES5 XMLHttpRequest)
+           ========================================================================= */
+
+        function apiRequest(action, extraParams, callback) {
+            showLoading();
+            var xhr = new XMLHttpRequest();
+            var reqUrl = PROXY_URL + xtreamConfig.url + "/player_api.php?username=" + xtreamConfig.username + "&password=" + xtreamConfig.password;
+            
+            if (action) reqUrl += "&action=" + action;
+            if (extraParams) reqUrl += extraParams;
+
+            xhr.open("GET", reqUrl, true);
+            xhr.timeout = 15000; // 15 saniye zaman aşımı
+            
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    hideLoading();
+                    if (xhr.status === 200) {
+                        try {
+                            var jsonResponse = JSON.parse(xhr.responseText);
+                            callback(true, jsonResponse);
+                        } catch (e) {
+                            callback(false, "Geçersiz Yanıt Formatı");
+                        }
+                    } else {
+                        callback(false, "Bağlantı Hatası: " + xhr.status);
+                    }
+                }
+            };
+            
+            xhr.ontimeout = function() {
+                hideLoading();
+                callback(false, "Bağlantı Zaman Aşımına Uğradı");
+            };
+
+            xhr.send();
+        }
+
+        function verifyLogin() {
+            xtreamConfig.url = document.getElementById("input-url").value.replace(/\/$/, ""); // Sonda slash varsa sil
+            xtreamConfig.username = document.getElementById("input-user").value;
+            xtreamConfig.password = document.getElementById("input-pass").value;
+
+            if (xtreamConfig.url === "" || xtreamConfig.username === "") {
+                document.getElementById("login-error").innerText = "Lütfen alanları doldurun!";
+                showElement("login-error");
+                return;
+            }
+
+            apiRequest(null, null, function(success, data) {
+                if (success && data && data.user_info && data.user_info.auth === 1) {
+                    hideElement("login-error");
+                    saveLoginData();
+                    
+                    appState.activeSection = "menu";
+                    appState.menuIndex = 0;
+                    updateUIVisibility();
+                    setFocus(menuItems[appState.menuIndex]);
+                    
+                    // Varsayılan olarak CANLI TV kategorilerini çek
+                    loadCategories("get_live_categories");
+                } else {
+                    document.getElementById("login-error").innerText = "Giriş Başarısız! Yetkisiz Kullanıcı.";
+                    showElement("login-error");
+                }
+            });
+        }
+
+        /* =========================================================================
+           BÖLÜM 4: VERİ YÜKLEME VE RENDER (RAM KORUMALI)
+           ========================================================================= */
+
+        function loadCategories(action) {
+            document.getElementById("category-list").innerHTML = "";
+            document.getElementById("content-list").innerHTML = "";
+            appState.allCategories = [];
+            appState.allContents = [];
+            
+            apiRequest(action, null, function(success, data) {
+                if (success && data && data.length > 0) {
+                    appState.allCategories = data;
+                    renderCategories();
+                }
+            });
+        }
+
+        function renderCategories() {
+            var container = document.getElementById("category-list");
+            container.innerHTML = "";
+            
+            for (var i = 0; i < appState.allCategories.length; i++) {
+                var div = document.createElement("div");
+                div.className = "category-item";
+                div.id = "cat-" + i;
+                div.innerText = appState.allCategories[i].category_name;
+                container.appendChild(div);
+            }
+        }
+
+        function loadContents(categoryId) {
+            var action = "";
+            if (appState.currentMenuType === "live") action = "get_live_streams";
+            else if (appState.currentMenuType === "vod") action = "get_vod_streams";
+            else if (appState.currentMenuType === "series") action = "get_series";
+
+            document.getElementById("content-list").innerHTML = "";
+            appState.allContents = [];
+            appState.currentPage = 0;
+            appState.contentIndex = 0;
+
+            apiRequest(action, "&category_id=" + categoryId, function(success, data) {
+                if (success && data && data.length > 0) {
+                    appState.allContents = data;
+                    renderContentPage();
+                } else {
+                    var container = document.getElementById("content-list");
+                    container.innerHTML = "<div class='content-item'>İçerik bulunamadı.</div>";
+                    document.getElementById("pagination-info").innerText = "Sayfa: 0/0";
+                }
+            });
+        }
+
+        // BÖLÜM 4.1: SAYFALAMA MANTIĞI (PAGINATION) - TV ÇÖKMESİNİ ENGELLER
+        function renderContentPage() {
+            var container = document.getElementById("content-list");
+            container.innerHTML = ""; // DOM'u tamamen temizle (RAM boşalsın)
+
+            var startIndex = appState.currentPage * appState.pageLimit;
+            var endIndex = startIndex + appState.pageLimit;
+            
+            // Eğer bitiş index'i toplam uzunluğu aşarsa sınırla
+            if (endIndex > appState.allContents.length) {
+                endIndex = appState.allContents.length;
+            }
+
+            for (var i = startIndex; i < endIndex; i++) {
+                var item = appState.allContents[i];
+                var div = document.createElement("div");
+                div.className = "content-item";
+                div.id = "content-" + (i - startIndex); // DOM indexi 0'dan başlar
+                div.innerText = item.name;
+                container.appendChild(div);
+            }
+
+            var totalPages = Math.ceil(appState.allContents.length / appState.pageLimit);
+            document.getElementById("pagination-info").innerText = "Sayfa: " + (appState.currentPage + 1) + " / " + totalPages + " (Toplam: " + appState.allContents.length + ")";
+            
+            // Eğer focus şu an içerik alanındaysa, ilk öğeyi odakla
+            if (appState.activeSection === "content") {
+                setFocus("content-" + appState.contentIndex);
+            }
+        }
+
+        /* =========================================================================
+           BÖLÜM 5: VİDEO OYNATICI VE YAYIN BAĞLANTISI ÜRETME
+           ========================================================================= */
+
+        function playSelectedContent() {
+            var globalIndex = (appState.currentPage * appState.pageLimit) + appState.contentIndex;
+            var selectedItem = appState.allContents[globalIndex];
+            
+            if (!selectedItem) return;
+
+            var streamUrl = "";
+            
+            // Akış URL'si oluşturma
+            if (appState.currentMenuType === "live") {
+                // CANLI TV: /live/user/pass/streamID.ts
+                streamUrl = xtreamConfig.url + "/live/" + xtreamConfig.username + "/" + xtreamConfig.password + "/" + selectedItem.stream_id + ".ts";
+            } 
+            else if (appState.currentMenuType === "vod") {
+                // SİNEMA: /movie/user/pass/streamID.extension
+                var ext = selectedItem.container_extension ? selectedItem.container_extension : "mp4";
+                streamUrl = xtreamConfig.url + "/movie/" + xtreamConfig.username + "/" + xtreamConfig.password + "/" + selectedItem.stream_id + "." + ext;
+            }
+            else if (appState.currentMenuType === "series") {
+                // ES5 mimarisini basit ve kilitlenmeden uzak tutmak için serilerde ilk bölüm URL formunu deniyoruz
+                // Normalde Series için ayrı bir dizi info isteği atılır, fakat cihaz sınırları sebebiyle
+                // basit stream mantığı yürütülmüştür. (Eğer seri ise /series/... kullanılır)
+                var extSeries = selectedItem.container_extension ? selectedItem.container_extension : "mp4";
+                streamUrl = xtreamConfig.url + "/series/" + xtreamConfig.username + "/" + xtreamConfig.password + "/" + selectedItem.series_id + "." + extSeries;
+            }
+
+            // PROXY varsa ekle
+            streamUrl = PROXY_URL + streamUrl;
+
+            appState.activeSection = "player";
+            updateUIVisibility();
+            
+            var videoPlayer = document.getElementById("video-player");
+            hideElement("player-error-msg");
+            
+            videoPlayer.src = streamUrl;
+            videoPlayer.load();
+            videoPlayer.play();
+        }
+
+        function stopAndExitPlayer() {
+            var videoPlayer = document.getElementById("video-player");
+            videoPlayer.pause();
+            videoPlayer.removeAttribute('src'); // Kaynağı boşalt, hafızadan düşsün
+            videoPlayer.load();
+            
+            appState.activeSection = "content";
+            updateUIVisibility();
+            setFocus("content-" + appState.contentIndex);
+        }
+
+        // Hata yakalama mekanizması
+        document.getElementById("video-player").onerror = function() {
+            showElement("player-error-msg");
+        };
+
+        /* =========================================================================
+           BÖLÜM 6: TV KUMANDASI / KLAVYE KONTROLLERİ (KEYDOWN EVENT)
+           ========================================================================= */
+
+        document.addEventListener("keydown", function(event) {
+            var keyCode = event.keyCode || event.which;
+
+            // Ortak Tuş Kodları
+            var KEY_ENTER = 13;
+            var KEY_UP = 38;
+            var KEY_DOWN = 40;
+            var KEY_LEFT = 37;
+            var KEY_RIGHT = 39;
+            var KEY_BACK = 8;     // Backspace (Bilgisayar / Bazı TV'ler)
+            var KEY_ESC = 27;     // Escape
+            var KEY_RETURN = 461; // LG WebOS Return
+            var KEY_RETURN_TIZEN = 10009; // Samsung Tizen Return
+
+            // GERİ DÖNÜŞ TUŞLARI YÖNETİMİ
+            if (keyCode === KEY_BACK || keyCode === KEY_ESC || keyCode === KEY_RETURN || keyCode === KEY_RETURN_TIZEN) {
+                event.preventDefault();
+                if (appState.activeSection === "player") {
+                    stopAndExitPlayer();
+                } else if (appState.activeSection === "content") {
+                    appState.activeSection = "categories";
+                    setFocus("cat-" + appState.categoryIndex);
+                } else if (appState.activeSection === "categories") {
+                    appState.activeSection = "menu";
+                    setFocus(menuItems[appState.menuIndex]);
+                }
+                return;
+            }
+
+            // 6.1: GİRİŞ EKRANI NAVİGASYONU
+            if (appState.activeSection === "login") {
+                if (keyCode === KEY_DOWN) {
+                    if (appState.loginIndex < loginInputs.length - 1) appState.loginIndex++;
+                    setFocus(loginInputs[appState.loginIndex]);
+                } else if (keyCode === KEY_UP) {
+                    if (appState.loginIndex > 0) appState.loginIndex--;
+                    setFocus(loginInputs[appState.loginIndex]);
+                } else if (keyCode === KEY_ENTER) {
+                    if (appState.loginIndex === 3) { // Giriş Butonu
+                        verifyLogin();
+                    } else {
+                        // Input alanlarına girmek için kumandada OK tuşuna basınca standart davranış
+                        document.getElementById(loginInputs[appState.loginIndex]).focus();
+                    }
+                }
+            }
+            
+            // 6.2: ANA MENÜ NAVİGASYONU
+            else if (appState.activeSection === "menu") {
+                if (keyCode === KEY_DOWN) {
+                    if (appState.menuIndex < menuItems.length - 1) appState.menuIndex++;
+                    setFocus(menuItems[appState.menuIndex]);
+                } else if (keyCode === KEY_UP) {
+                    if (appState.menuIndex > 0) appState.menuIndex--;
+                    setFocus(menuItems[appState.menuIndex]);
+                } else if (keyCode === KEY_RIGHT) {
+                    if (appState.allCategories.length > 0) {
+                        appState.activeSection = "categories";
+                        setFocus("cat-" + appState.categoryIndex);
+                    }
+                } else if (keyCode === KEY_ENTER) {
+                    var selectedMenu = menuItems[appState.menuIndex];
+                    var action = "";
+                    if (selectedMenu === "menu-live") { appState.currentMenuType = "live"; action = "get_live_categories"; }
+                    else if (selectedMenu === "menu-vod") { appState.currentMenuType = "vod"; action = "get_vod_categories"; }
+                    else if (selectedMenu === "menu-series") { appState.currentMenuType = "series"; action = "get_series_categories"; }
+                    
+                    appState.categoryIndex = 0;
+                    loadCategories(action);
+                }
+            }
+
+            // 6.3: KATEGORİ NAVİGASYONU
+            else if (appState.activeSection === "categories") {
+                if (keyCode === KEY_DOWN) {
+                    if (appState.categoryIndex < appState.allCategories.length - 1) {
+                        appState.categoryIndex++;
+                        setFocus("cat-" + appState.categoryIndex);
+                    }
+                } else if (keyCode === KEY_UP) {
+                    if (appState.categoryIndex > 0) {
+                        appState.categoryIndex--;
+                        setFocus("cat-" + appState.categoryIndex);
+                    }
+                } else if (keyCode === KEY_LEFT) {
+                    appState.activeSection = "menu";
+                    setFocus(menuItems[appState.menuIndex]);
+                } else if (keyCode === KEY_RIGHT) {
+                    if (appState.allContents.length > 0) {
+                        appState.activeSection = "content";
+                        appState.contentIndex = 0;
+                        setFocus("content-0");
+                    }
+                } else if (keyCode === KEY_ENTER) {
+                    var selectedCatId = appState.allCategories[appState.categoryIndex].category_id;
+                    appState.selectedCategoryId = selectedCatId;
+                    loadContents(selectedCatId);
+                    // İçerik yüklendikten sonra sağ panele geçiş yap
+                    setTimeout(function(){
+                        if(appState.allContents.length > 0) {
+                            appState.activeSection = "content";
+                            setFocus("content-0");
+                        }
+                    }, 500); // Eski API'lerin yanıt süresi hesaba katılarak ufak bir gecikme
+                }
+            }
+
+            // 6.4: İÇERİK (KANAL/FİLM) NAVİGASYONU & SAYFALAMA KONTROLÜ
+            else if (appState.activeSection === "content") {
+                var currentDOMItemsCount = document.getElementById("content-list").children.length;
+
+                if (keyCode === KEY_DOWN) {
+                    if (appState.contentIndex < currentDOMItemsCount - 1) {
+                        appState.contentIndex++;
+                        setFocus("content-" + appState.contentIndex);
+                    } else {
+                        // Sayfa Sonuna Gelindi, Sonraki Sayfayı Yükle
+                        var totalPages = Math.ceil(appState.allContents.length / appState.pageLimit);
+                        if (appState.currentPage < totalPages - 1) {
+                            appState.currentPage++;
+                            appState.contentIndex = 0;
+                            renderContentPage();
+                        }
+                    }
+                } else if (keyCode === KEY_UP) {
+                    if (appState.contentIndex > 0) {
+                        appState.contentIndex--;
+                        setFocus("content-" + appState.contentIndex);
+                    } else {
+                        // Sayfa Başına Gelindi, Önceki Sayfayı Yükle
+                        if (appState.currentPage > 0) {
+                            appState.currentPage--;
+                            appState.contentIndex = appState.pageLimit - 1; // Bir önceki sayfanın en altı
+                            renderContentPage();
+                        }
+                    }
+                } else if (keyCode === KEY_LEFT) {
+                    appState.activeSection = "categories";
+                    setFocus("cat-" + appState.categoryIndex);
+                } else if (keyCode === KEY_ENTER) {
+                    playSelectedContent();
+                }
+            }
+            
+            // 6.5: VİDEO EKRANI KONTROLLERİ (PLAY/PAUSE)
+            else if (appState.activeSection === "player") {
+                if (keyCode === KEY_ENTER) {
+                    var videoPlayer = document.getElementById("video-player");
+                    if (videoPlayer.paused) {
+                        videoPlayer.play();
+                    } else {
+                        videoPlayer.pause();
+                    }
+                }
+            }
+        });
+
+        /* =========================================================================
+           BÖLÜM 7: BAŞLANGIÇ (INIT) FONKSİYONU
+           ========================================================================= */
+
+        window.onload = function() {
+            restoreLoginData();
+            updateUIVisibility();
+            setFocus(loginInputs[appState.loginIndex]); // İlk açılışta URL inputuna focus
+        };
+
+    </script>
+</body>
+</html>
