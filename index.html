@@ -36,7 +36,8 @@
         input:focus,
         .fav-star:focus,
         .search-input:focus,
-        .resume-btn:focus {
+        .resume-btn:focus,
+        .delete-panel-btn:focus {
             outline: none !important;
             border: 4px solid #ff0 !important;
             box-shadow: 0 0 18px 6px rgba(255,255,0,0.8) !important;
@@ -102,13 +103,23 @@
 
         .saved-panels {
             margin-top: 24px; background: #1a1a1a; padding: 20px; border-radius: 10px;
-            width: 560px; max-width: 92vw; max-height: 240px; overflow-y: auto;
+            width: 560px; max-width: 92vw; max-height: 300px; overflow-y: auto;
         }
         .saved-panels h3 { color: #f0c040; margin-bottom: 12px; font-size: 30px; }
+        .saved-panel-row {
+            display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 2px solid #333; padding: 8px 0;
+        }
         .saved-panel-item {
-            padding: 16px; border-bottom: 2px solid #333; cursor: pointer; font-size: 24px;
+            flex: 1; padding: 16px 8px; cursor: pointer; font-size: 24px;
         }
         .saved-panel-item:hover { background: #333; }
+        .delete-panel-btn {
+            background: #5c1a1a; color: #ff5c5c; border: 2px solid #ff5c5c;
+            padding: 12px 16px; font-size: 22px; cursor: pointer; border-radius: 6px;
+            margin-left: 10px; white-space: nowrap;
+        }
+        .delete-panel-btn:hover { background: #7c2a2a; }
 
         /* ========== ANA MENÜ ========== */
         #mainMenuScreen.active { flex-direction: column; justify-content: center; align-items: center; }
@@ -252,8 +263,7 @@
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: rgba(0,0,0,0.85); color: #ff5c5c; padding: 40px 50px; font-size: 28px;
             border-radius: 12px; z-index: 25; display: none; text-align: center;
-            max-width: 85%; line-height: 1.5;
-            border: 3px solid #ff5c5c;
+            max-width: 85%; line-height: 1.5; border: 3px solid #ff5c5c;
         }
         .resume-popup {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -423,9 +433,9 @@
     var favorites = [];
 
     // Resume (kaldığı yerden devam) değişkenleri
-    var resumeData = {}; // { key: seconds }
+    var resumeData = {};
     var currentResumeKey = "";
-    var pendingResumeCallback = null; // kullanıcı seçimini bekleyen callback
+    var pendingResumeCallback = null;
 
     // Kanal numarası buffer
     var channelBuffer = "";
@@ -497,7 +507,7 @@
         if (!container) container = document;
         var els = container.querySelectorAll(
             'button, .cat-item, .stream-item, .episode-item, .season-box, .saved-panel-item, ' +
-            '.fav-item, .fav-star, input:not([type="hidden"]), .progress-bar, .menu-btn, .ctrl-btn, .back-btn, .home-btn, .back-btn-text, .sidebar-panel-btn, .resume-btn'
+            '.fav-item, .fav-star, input:not([type="hidden"]), .progress-bar, .menu-btn, .ctrl-btn, .back-btn, .home-btn, .back-btn-text, .sidebar-panel-btn, .resume-btn, .delete-panel-btn'
         );
         var result = [];
         for (var i = 0; i < els.length; i++) {
@@ -558,11 +568,15 @@
         xhr.send();
     }
 
-    // ==================== PANEL KAYIT ====================
+    // ==================== PANEL KAYIT / SİL ====================
     function loadSavedPanels() {
         var str = localStorage.getItem('iptv_panels');
         if (!str) return [];
         try { return JSON.parse(str) || []; } catch(e) { return []; }
+    }
+
+    function savePanelsToStorage(panels) {
+        localStorage.setItem('iptv_panels', JSON.stringify(panels));
     }
 
     function savePanel(panelName, server, user, pass) {
@@ -575,7 +589,25 @@
             }
         }
         if (!found) panels.push({ name: panelName, server: server, username: user, password: pass });
-        localStorage.setItem('iptv_panels', JSON.stringify(panels));
+        savePanelsToStorage(panels);
+        renderSavedPanels();
+    }
+
+    function deletePanel(panelName) {
+        var panels = loadSavedPanels();
+        var newPanels = [];
+        for (var i = 0; i < panels.length; i++) {
+            if (panels[i].name !== panelName) {
+                newPanels.push(panels[i]);
+            }
+        }
+        savePanelsToStorage(newPanels);
+
+        // Eğer silinen panel son aktif panel ise, onu da temizle
+        var lastActive = getLastActivePanel();
+        if (lastActive && lastActive.name === panelName) {
+            clearLastActivePanel();
+        }
         renderSavedPanels();
     }
 
@@ -593,15 +625,36 @@
         }
         for (var i = 0; i < panels.length; i++) {
             (function(panel) {
-                var div = document.createElement('div');
-                div.className = 'saved-panel-item';
-                div.setAttribute('tabindex', '0');
-                div.textContent = panel.name + ' (' + panel.server + ')';
-                div.onclick = function() {
+                var row = document.createElement('div');
+                row.className = 'saved-panel-row';
+
+                var nameDiv = document.createElement('div');
+                nameDiv.className = 'saved-panel-item';
+                nameDiv.setAttribute('tabindex', '0');
+                nameDiv.textContent = panel.name + ' (' + panel.server + ')';
+                nameDiv.onclick = function() {
                     selectSavedPanel(panel);
                 };
-                div.onkeydown = function(e) { if (e.keyCode === 13) selectSavedPanel(panel); };
-                container.appendChild(div);
+                nameDiv.onkeydown = function(e) { if (e.keyCode === 13) selectSavedPanel(panel); };
+
+                var deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-panel-btn';
+                deleteBtn.setAttribute('tabindex', '0');
+                deleteBtn.textContent = '❌ SİL';
+                deleteBtn.onclick = function(e) {
+                    e.stopPropagation();
+                    deletePanel(panel.name);
+                };
+                deleteBtn.onkeydown = function(e) {
+                    if (e.keyCode === 13) {
+                        e.stopPropagation();
+                        deletePanel(panel.name);
+                    }
+                };
+
+                row.appendChild(nameDiv);
+                row.appendChild(deleteBtn);
+                container.appendChild(row);
             })(panels[i]);
         }
     }
@@ -661,7 +714,7 @@
         }
     }
 
-    // ==================== RESUME (KALDIĞI YERDEN DEVAM) ====================
+    // ==================== RESUME ====================
     function loadResumeData() {
         var str = localStorage.getItem('iptv_resume');
         if (!str) { resumeData = {}; return; }
@@ -731,7 +784,6 @@
                 historyStack = [];
                 navigateTo('main_menu', 'mainMenuScreen', false);
             } else {
-                // Başarısız olursa login ekranını göster
                 clearLastActivePanel();
                 if (errorEl) errorEl.textContent = '';
                 showScreen('loginScreen');
@@ -881,7 +933,7 @@
         var slice = displayList.slice(start, end);
         for (var i = 0; i < slice.length; i++) {
             var item = slice[i];
-            var globalIndex = start + i + 1; // 1'den başlayan kanal numarası
+            var globalIndex = start + i + 1;
             var div = document.createElement('div'); div.className = 'stream-item'; div.setAttribute('tabindex', '0');
             var numSpan = document.createElement('span'); numSpan.className = 'num'; numSpan.textContent = globalIndex;
             var nameSpan = document.createElement('span'); nameSpan.className = 'name'; nameSpan.textContent = item.name || item.title || 'İsimsiz';
@@ -917,7 +969,6 @@
             var resumeKey = getResumeKey('vod', item);
             checkResumeAndPlay('vod', item, resumeKey);
         } else {
-            // Canlı TV: direkt oynat
             var streamUrl = item.stream_url || (XTREAM_URL + '/live/' + USERNAME + '/' + PASSWORD + '/' + item.stream_id + '.ts');
             openPlayer(streamUrl, item.name || item.title, 'live', item);
         }
@@ -1044,24 +1095,15 @@
 
     function checkResumeAndPlay(type, item, resumeKey, isEpisode) {
         var savedTime = getResumeTime(resumeKey);
-        var duration = 0;
-        if (type === 'vod') duration = 0; // bilinmiyor
-        if (type === 'series') duration = 0;
-
-        // Eğer kayıtlı süre 10 saniyeden az ise direkt başlat
         if (savedTime < 10) {
             startPlayback(type, item, 0, resumeKey);
             return;
         }
-
-        // Resume popup'ı göster
         currentResumeKey = resumeKey;
         pendingResumeCallback = function(startFrom) {
             pendingResumeCallback = null;
             startPlayback(type, item, startFrom, resumeKey);
         };
-
-        // Player ekranına geç ama videoyu henüz başlatma
         navigateTo('player', 'playerScreen');
         videoElement = getEl('videoPlayer');
         videoElement.src = '';
@@ -1075,7 +1117,6 @@
     function startPlayback(type, item, startTime, resumeKey) {
         getEl('resumePopup').classList.remove('active');
         getEl('errorOverlay').style.display = 'none';
-
         var streamUrl = '';
         if (type === 'vod') {
             streamUrl = item.stream_url || (XTREAM_URL + '/movie/' + USERNAME + '/' + PASSWORD + '/' + item.stream_id + '.' + (item.container_extension || 'mp4'));
@@ -1085,16 +1126,12 @@
         } else if (type === 'live') {
             streamUrl = item.stream_url || (XTREAM_URL + '/live/' + USERNAME + '/' + PASSWORD + '/' + item.stream_id + '.ts');
         }
-
         targetPlaybackRate = 1.0; playbackRateReady = false;
         if (speedApplyTimer) clearTimeout(speedApplyTimer);
-
         videoElement = getEl('videoPlayer');
         getEl('speedIndicator').textContent = '1.0x';
         videoElement.src = streamUrl;
         videoElement.load();
-
-        // startTime sıfırdan büyükse, metadata yüklenince o saniyeye atla
         if (startTime > 0) {
             var seekHandler = function() {
                 videoElement.currentTime = startTime;
@@ -1104,10 +1141,8 @@
             videoElement.addEventListener('loadedmetadata', seekHandler);
             videoElement.addEventListener('canplay', seekHandler);
         }
-
         videoElement.play();
         currentResumeKey = resumeKey;
-
         if (window.history && window.history.pushState) {
             window.history.pushState({ playerOpen: true }, '', '#player');
         }
@@ -1116,7 +1151,6 @@
     }
 
     function openPlayer(url, title, type, item) {
-        // Canlı TV için direkt aç
         targetPlaybackRate = 1.0; playbackRateReady = false;
         if (speedApplyTimer) clearTimeout(speedApplyTimer);
         navigateTo('player', 'playerScreen');
@@ -1178,11 +1212,9 @@
             var cur = videoElement.currentTime; var dur = videoElement.duration;
             getEl('timeCurrent').textContent = formatTime(cur);
             if (dur && !isNaN(dur)) { getEl('timeDuration').textContent = formatTime(dur); getEl('progressFill').style.width = ((cur / dur) * 100) + '%'; }
-            // Hız kontrolü
             if (Math.floor(cur) % 5 === 0 && playbackRateReady && targetPlaybackRate > 0) {
                 if (Math.abs(videoElement.playbackRate - targetPlaybackRate) > 0.01) forceApplySpeed();
             }
-            // Resume kaydı (her 5 saniyede bir)
             if (currentResumeKey && Math.floor(cur) % 5 === 0 && cur > 0) {
                 setResumeTime(currentResumeKey, cur);
             }
@@ -1191,7 +1223,7 @@
         videoElement.onpause = updatePlayPauseButton;
         videoElement.onended = function() {
             updatePlayPauseButton();
-            if (currentResumeKey) setResumeTime(currentResumeKey, 0); // bitti, sıfırla
+            if (currentResumeKey) setResumeTime(currentResumeKey, 0);
         };
         videoElement.onerror = function() {
             getEl('errorOverlay').style.display = 'block';
@@ -1213,7 +1245,6 @@
         };
         getEl('playerBackBtn').onclick = function() { closePlayerAndGoBack(); };
 
-        // Resume popup butonları
         getEl('resumeYesBtn').onclick = function() {
             getEl('resumePopup').classList.remove('active');
             if (pendingResumeCallback) {
@@ -1239,11 +1270,9 @@
         }
         lastChannelBufferTime = now;
         channelBuffer += digit;
-        // Buffer'ı göster
         var display = getEl('channelNumberDisplay');
         display.textContent = channelBuffer;
         display.style.display = 'block';
-
         if (channelBufferTimeout) clearTimeout(channelBufferTimeout);
         channelBufferTimeout = setTimeout(function() {
             var targetNum = parseInt(channelBuffer, 10);
@@ -1251,15 +1280,12 @@
             getEl('channelNumberDisplay').style.display = 'none';
             if (targetNum > 0) {
                 if (currentScreen === 'player') {
-                    // Player'daysa kanalı değiştir
                     if (!playChannelByNumber(targetNum)) {
-                        // Bulunamazsa kısa bir uyarı göster
                         getEl('channelNumberDisplay').textContent = 'Kanal bulunamadı';
                         getEl('channelNumberDisplay').style.display = 'block';
                         setTimeout(function() { getEl('channelNumberDisplay').style.display = 'none'; }, 1500);
                     }
                 } else if (currentScreen === 'list' && currentListType === 'live') {
-                    // Liste ekranındaysa o kanalı bulup oynat
                     var channel = findChannelByNumber(targetNum);
                     if (channel) {
                         onStreamClick(channel, targetNum);
@@ -1284,21 +1310,8 @@
     function bindGlobalKeyboard() {
         window.addEventListener('keydown', function(e) {
             var key = e.keyCode;
-
-            // Rakam tuşları (48-57: 0-9)
-            if (key >= 48 && key <= 57) {
-                var digit = key - 48;
-                handleDigitKey(digit);
-                e.preventDefault();
-                return;
-            }
-            // Numpad rakamları (96-105: 0-9)
-            if (key >= 96 && key <= 105) {
-                var digit2 = key - 96;
-                handleDigitKey(digit2);
-                e.preventDefault();
-                return;
-            }
+            if (key >= 48 && key <= 57) { handleDigitKey(key - 48); e.preventDefault(); return; }
+            if (key >= 96 && key <= 105) { handleDigitKey(key - 96); e.preventDefault(); return; }
 
             if (currentScreen === 'player') {
                 if (key === 37) { if(videoElement) videoElement.currentTime = Math.max(0, videoElement.currentTime - 10); showControlsTemporarily(); e.preventDefault(); return; }
@@ -1343,7 +1356,6 @@
         bindHomeButtons(); bindSearchEvents();
         setupPlayerEvents(); initPlayerControls(); bindGlobalKeyboard();
 
-        // Auto-login denemesi
         var autoLoggedIn = tryAutoLogin();
         if (!autoLoggedIn) {
             showScreen('loginScreen');
