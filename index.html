@@ -5,1033 +5,842 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Xtream IPTV Player</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             background: #0a0a0a;
             color: #e0e0e0;
             font-family: Arial, Helvetica, sans-serif;
             font-size: 18px;
             overflow: hidden;
-            height: 100vh;
-            width: 100vw;
+            height: 100vh; width: 100vw;
             user-select: none;
             -webkit-user-select: none;
         }
-        #app {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
+        #app { position: relative; width: 100%; height: 100%; overflow: hidden; }
         .screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: #0a0a0a;
-            overflow: hidden;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            background: #0a0a0a; overflow: hidden;
         }
-        .screen.active {
-            display: flex;
-        }
-        #loginScreen.active {
-            justify-content: center;
-            align-items: center;
-        }
-        #menuScreen.active {
-            flex-direction: row;
-            justify-content: center;
-            align-items: center;
-            gap: 30px;
-        }
-        #listScreen.active, #seriesDetailScreen.active {
-            flex-direction: row;
-            align-items: stretch;
-            justify-content: flex-start;
-        }
-        #playerScreen.active {
-            background: #000;
-            justify-content: center;
-            align-items: center;
-        }
-        /* Login Form */
+        .screen.active { display: flex; }
+
+        /* Login */
+        #loginScreen.active { justify-content: center; align-items: center; }
         .login-container {
-            background: #1a1a1a;
-            padding: 40px;
-            border-radius: 8px;
-            display: flex;
-            flex-direction: column;
-            width: 450px;
-            max-width: 90vw;
+            background: #1a1a1a; padding: 40px; border-radius: 8px;
+            display: flex; flex-direction: column; width: 500px; max-width: 90vw;
         }
-        .login-container h2 {
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 28px;
-            color: #f0c040;
+        .login-container h2 { text-align: center; margin-bottom: 30px; font-size: 28px; color: #f0c040; }
+        .login-container input, .login-container button {
+            margin-bottom: 15px; padding: 15px; font-size: 20px;
+            background: #2a2a2a; border: 1px solid #444; color: #fff; border-radius: 4px; outline: none;
         }
-        .login-container input {
-            margin-bottom: 15px;
-            padding: 15px;
-            font-size: 20px;
-            background: #2a2a2a;
-            border: 1px solid #444;
-            color: #fff;
-            border-radius: 4px;
-            outline: none;
-        }
-        .login-container input:focus {
-            border-color: #f0c040;
-        }
+        .login-container input:focus { border-color: #f0c040; }
         .login-container button {
-            padding: 15px;
-            font-size: 22px;
-            background: #f0c040;
-            color: #000;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            margin-top: 10px;
+            background: #f0c040; color: #000; border: none; cursor: pointer; font-weight: bold; margin-top: 10px;
         }
-        .login-container .error-msg {
-            color: #ff5c5c;
-            text-align: center;
-            margin-top: 10px;
-            font-size: 16px;
-            min-height: 20px;
+        .login-container .error-msg { color: #ff5c5c; text-align: center; margin-top: 10px; font-size: 16px; min-height: 20px; }
+
+        .saved-panels {
+            margin-top: 20px; background: #1a1a1a; padding: 15px; border-radius: 8px;
+            width: 500px; max-width: 90vw; max-height: 200px; overflow-y: auto;
         }
-        /* Menu */
+        .saved-panels h3 { color: #f0c040; margin-bottom: 10px; font-size: 20px; }
+        .saved-panel-item {
+            padding: 12px; border-bottom: 1px solid #333; cursor: pointer; font-size: 18px;
+        }
+        .saved-panel-item:hover { background: #333; }
+
+        /* Main Menu */
+        #mainMenuScreen.active { flex-direction: row; justify-content: center; align-items: center; }
         .menu-btn {
-            background: #2a2a2a;
-            border: 2px solid #555;
-            color: #fff;
-            font-size: 32px;
-            padding: 40px 30px;
-            margin: 0 15px;
-            cursor: pointer;
-            border-radius: 8px;
-            min-width: 200px;
-            text-align: center;
-            transition: background 0.2s;
+            background: #2a2a2a; border: 2px solid #555; color: #fff;
+            font-size: 32px; padding: 40px 30px; margin: 0 15px; cursor: pointer;
+            border-radius: 8px; min-width: 200px; text-align: center; transition: background 0.2s;
         }
-        .menu-btn:hover, .menu-btn:focus {
-            background: #3a3a3a;
-            border-color: #f0c040;
-            outline: none;
-        }
-        /* List Layout */
+        .menu-btn:hover, .menu-btn:focus { background: #3a3a3a; border-color: #f0c040; outline: none; }
+
+        /* List Screens (live, vod, series) */
+        #listScreen.active { flex-direction: row; align-items: stretch; justify-content: flex-start; }
         .sidebar {
-            width: 250px;
-            background: #121212;
-            overflow-y: auto;
-            overflow-x: hidden;
-            border-right: 2px solid #333;
-            flex-shrink: 0;
+            width: 250px; background: #121212; overflow-y: auto; overflow-x: hidden;
+            border-right: 2px solid #333; flex-shrink: 0;
         }
         .sidebar .cat-item {
-            padding: 18px 15px;
-            cursor: pointer;
-            border-bottom: 1px solid #2a2a2a;
-            font-size: 18px;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-            overflow: hidden;
+            padding: 18px 15px; cursor: pointer; border-bottom: 1px solid #2a2a2a;
+            font-size: 18px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;
         }
-        .sidebar .cat-item.active {
-            background: #f0c040;
-            color: #000;
-            font-weight: bold;
-        }
-        .content-panel {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
+        .sidebar .cat-item.active { background: #f0c040; color: #000; font-weight: bold; }
+        .content-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
         .content-header {
-            padding: 15px;
-            background: #181818;
-            border-bottom: 1px solid #333;
-            font-size: 22px;
-            font-weight: bold;
-            color: #f0c040;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            padding: 15px; background: #181818; border-bottom: 1px solid #333;
+            font-size: 22px; font-weight: bold; color: #f0c040; display: flex;
+            align-items: center; justify-content: space-between;
         }
-        .content-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 10px;
-            display: flex;
-            flex-direction: column;
+        .home-btn {
+            background: #2a2a2a; border: 1px solid #f0c040; color: #f0c040;
+            padding: 8px 16px; font-size: 18px; cursor: pointer; border-radius: 4px;
         }
+        .content-list { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; }
         .stream-item, .episode-item {
-            padding: 15px 10px;
-            border-bottom: 1px solid #2a2a2a;
-            cursor: pointer;
-            font-size: 20px;
-            display: flex;
-            align-items: center;
+            padding: 15px 10px; border-bottom: 1px solid #2a2a2a; cursor: pointer; font-size: 20px;
+            display: flex; align-items: center;
         }
-        .stream-item:hover, .episode-item:hover {
-            background: #222;
-        }
-        .stream-item .num {
-            width: 50px;
-            text-align: center;
-            color: #888;
-            margin-right: 10px;
-        }
-        .stream-item .name {
-            flex: 1;
-        }
-        .pagination {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 15px;
-            background: #181818;
-            border-top: 1px solid #333;
-        }
-        .pagination button {
-            background: #2a2a2a;
-            border: 1px solid #555;
-            color: #fff;
-            padding: 12px 25px;
-            font-size: 20px;
-            cursor: pointer;
-            margin: 0 10px;
-            border-radius: 4px;
-        }
-        .pagination button:disabled {
-            opacity: 0.3;
-            cursor: default;
-        }
-        .pagination .page-info {
-            font-size: 20px;
-            min-width: 120px;
-            text-align: center;
-        }
-        /* Player */
-        #videoPlayer {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            background: #000;
-        }
-        .player-container {
-            position: relative;
-            width: 100%;
-            height: 100%;
-        }
-        .back-btn {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: rgba(0,0,0,0.7);
-            color: #f0c040;
-            border: 2px solid #f0c040;
-            padding: 12px 20px;
-            font-size: 22px;
-            cursor: pointer;
-            z-index: 20;
-            border-radius: 4px;
-            display: none;
-        }
-        .player-container:hover .back-btn,
-        .player-container.show-controls .back-btn {
-            display: block;
-        }
-        .video-controls {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: linear-gradient(transparent, rgba(0,0,0,0.9));
-            padding: 20px 15px 15px;
-            display: none;
-            z-index: 15;
-            flex-direction: column;
-            transition: opacity 0.3s;
-        }
-        .player-container.show-controls .video-controls {
-            display: flex;
-        }
-        .progress-row {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        .progress-bar {
-            flex: 1;
-            height: 8px;
-            background: #555;
-            position: relative;
-            cursor: pointer;
-            margin: 0 10px;
-            border-radius: 4px;
-        }
-        .progress-fill {
-            height: 100%;
-            background: #f0c040;
-            width: 0%;
-            border-radius: 4px;
-        }
-        .time-current, .time-duration {
-            font-size: 18px;
-            min-width: 70px;
-            text-align: center;
-            color: #fff;
-        }
-        .controls-row {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 20px;
-        }
-        .ctrl-btn {
-            background: transparent;
-            border: 2px solid #aaa;
-            color: #fff;
-            font-size: 24px;
-            padding: 10px 20px;
-            cursor: pointer;
-            border-radius: 4px;
-            min-width: 70px;
-            text-align: center;
-        }
-        .ctrl-btn:hover {
-            border-color: #f0c040;
-            color: #f0c040;
-        }
-        .speed-indicator {
-            font-size: 20px;
-            color: #f0c040;
-            min-width: 60px;
-            text-align: center;
-        }
-        .error-overlay {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.8);
-            color: #ff5c5c;
-            padding: 25px 40px;
-            font-size: 24px;
-            border-radius: 8px;
-            z-index: 25;
-            display: none;
-            text-align: center;
-        }
-        /* Series Seasons */
-        .seasons-container {
-            display: flex;
-            flex-wrap: wrap;
-            padding: 20px;
-            gap: 20px;
-        }
+        .stream-item:hover, .episode-item:hover { background: #222; }
+        .stream-item .num { width: 50px; text-align: center; color: #888; margin-right: 10px; }
+        .stream-item .name { flex: 1; }
+        .pagination { display: flex; justify-content: center; align-items: center; padding: 15px; background: #181818; border-top: 1px solid #333; }
+        .pagination button { background: #2a2a2a; border: 1px solid #555; color: #fff; padding: 12px 25px; font-size: 20px; cursor: pointer; margin: 0 10px; border-radius: 4px; }
+        .pagination button:disabled { opacity: 0.3; cursor: default; }
+        .pagination .page-info { font-size: 20px; min-width: 120px; text-align: center; }
+
+        /* Seasons Screen */
+        #seasonsScreen.active { flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 20px; }
+        .seasons-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; padding: 20px; }
         .season-box {
-            background: #1e1e1e;
-            border: 1px solid #444;
-            padding: 20px;
-            cursor: pointer;
-            font-size: 20px;
-            border-radius: 6px;
-            min-width: 150px;
-            text-align: center;
+            background: #1e1e1e; border: 2px solid #444; padding: 30px 40px;
+            cursor: pointer; font-size: 24px; border-radius: 8px; min-width: 180px; text-align: center;
         }
-        .season-box.active {
-            border-color: #f0c040;
-            background: #2a2a2a;
+        .season-box:hover { border-color: #f0c040; background: #2a2a2a; }
+
+        /* Episodes Screen */
+        #episodesScreen.active { flex-direction: column; align-items: stretch; }
+        .episodes-header {
+            padding: 15px; background: #181818; border-bottom: 1px solid #333;
+            font-size: 22px; font-weight: bold; color: #f0c040; display: flex; align-items: center; justify-content: space-between;
         }
-        .episodes-list {
-            padding: 10px;
-            flex: 1;
-            overflow-y: auto;
+        .episodes-list { flex: 1; overflow-y: auto; padding: 10px; }
+        .back-btn-text {
+            background: #2a2a2a; border: 1px solid #f0c040; color: #f0c040;
+            padding: 8px 16px; font-size: 18px; cursor: pointer; border-radius: 4px;
         }
-        .back-to-series {
-            padding: 15px;
-            background: #2a2a2a;
-            border: none;
-            color: #fff;
-            font-size: 20px;
-            cursor: pointer;
-            margin: 10px;
+
+        /* Player */
+        #playerScreen.active { background: #000; justify-content: center; align-items: center; }
+        #videoPlayer { width: 100%; height: 100%; object-fit: contain; background: #000; }
+        .player-container { position: relative; width: 100%; height: 100%; }
+        .back-btn {
+            position: absolute; top: 20px; left: 20px;
+            background: rgba(0,0,0,0.7); color: #f0c040; border: 2px solid #f0c040;
+            padding: 12px 20px; font-size: 22px; cursor: pointer; z-index: 20; border-radius: 4px;
+            display: none;
+        }
+        .player-container.show-controls .back-btn { display: block; }
+        .video-controls {
+            position: absolute; bottom: 0; left: 0; width: 100%;
+            background: linear-gradient(transparent, rgba(0,0,0,0.9));
+            padding: 20px 15px 15px; display: none; z-index: 15; flex-direction: column;
+        }
+        .player-container.show-controls .video-controls { display: flex; }
+        .progress-row { display: flex; align-items: center; margin-bottom: 10px; }
+        .progress-bar {
+            flex: 1; height: 8px; background: #555; position: relative; cursor: pointer;
+            margin: 0 10px; border-radius: 4px;
+        }
+        .progress-fill { height: 100%; background: #f0c040; width: 0%; border-radius: 4px; }
+        .time-current, .time-duration { font-size: 18px; min-width: 70px; text-align: center; color: #fff; }
+        .controls-row { display: flex; align-items: center; justify-content: center; }
+        .ctrl-btn {
+            background: transparent; border: 2px solid #aaa; color: #fff;
+            font-size: 24px; padding: 10px 20px; cursor: pointer; border-radius: 4px; min-width: 70px; text-align: center; margin: 0 10px;
+        }
+        .ctrl-btn:hover { border-color: #f0c040; color: #f0c040; }
+        .speed-indicator { font-size: 20px; color: #f0c040; min-width: 60px; text-align: center; }
+        .error-overlay {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.8); color: #ff5c5c; padding: 25px 40px; font-size: 24px;
+            border-radius: 8px; z-index: 25; display: none; text-align: center;
         }
     </style>
 </head>
 <body>
-    <div id="app">
-        <!-- Login Screen -->
-        <div id="loginScreen" class="screen active">
-            <div class="login-container">
-                <h2>XTREAM IPTV</h2>
-                <input type="text" id="serverInput" placeholder="Sunucu Adresi (örn: http://server:port)">
-                <input type="text" id="usernameInput" placeholder="Kullanıcı Adı">
-                <input type="password" id="passwordInput" placeholder="Şifre">
-                <button id="loginBtn">GİRİŞ YAP</button>
-                <div class="error-msg" id="loginError"></div>
-            </div>
+<div id="app">
+    <!-- Login -->
+    <div id="loginScreen" class="screen active">
+        <div class="login-container">
+            <h2>XTREAM IPTV</h2>
+            <input type="text" id="panelNameInput" placeholder="Panel Adı (Abonelik İsmi)">
+            <input type="text" id="serverInput" placeholder="Sunucu Adresi (http://server:port)">
+            <input type="text" id="usernameInput" placeholder="Kullanıcı Adı">
+            <input type="password" id="passwordInput" placeholder="Şifre">
+            <button id="loginBtn">GİRİŞ YAP ve KAYDET</button>
+            <div class="error-msg" id="loginError"></div>
         </div>
-
-        <!-- Menu Screen -->
-        <div id="menuScreen" class="screen">
-            <button class="menu-btn" data-target="live">📺 CANLI TV</button>
-            <button class="menu-btn" data-target="vod">🎬 SİNEMA (VOD)</button>
-            <button class="menu-btn" data-target="series">📚 DİZİLER</button>
-        </div>
-
-        <!-- List Screen (Canlı TV, VOD, Series categories) -->
-        <div id="listScreen" class="screen">
-            <div class="sidebar" id="categorySidebar"></div>
-            <div class="content-panel">
-                <div class="content-header" id="contentHeader">Kategoriler</div>
-                <div class="content-list" id="contentList"></div>
-                <div class="pagination" id="pagination"></div>
-            </div>
-        </div>
-
-        <!-- Series Detail Screen (Seasons & Episodes) -->
-        <div id="seriesDetailScreen" class="screen">
-            <div class="sidebar" id="seasonsSidebar"></div>
-            <div class="content-panel">
-                <div class="content-header" id="seriesDetailHeader">Dizi Adı</div>
-                <div class="episodes-list" id="episodesList"></div>
-                <button class="back-to-series" id="backToSeriesBtn">⬅ DİZİ LİSTESİNE DÖN</button>
-            </div>
-        </div>
-
-        <!-- Player Screen -->
-        <div id="playerScreen" class="screen">
-            <div class="player-container" id="playerContainer">
-                <button class="back-btn" id="playerBackBtn">⬅ KANAL LİSTESİNE DÖN</button>
-                <video id="videoPlayer" preload="metadata"></video>
-                <div class="video-controls" id="videoControls">
-                    <div class="progress-row">
-                        <span class="time-current" id="timeCurrent">00:00</span>
-                        <div class="progress-bar" id="progressBar">
-                            <div class="progress-fill" id="progressFill"></div>
-                        </div>
-                        <span class="time-duration" id="timeDuration">00:00</span>
-                    </div>
-                    <div class="controls-row">
-                        <button class="ctrl-btn" id="playPauseBtn">▶</button>
-                        <span class="speed-indicator" id="speedIndicator">1.0x</span>
-                        <button class="ctrl-btn" id="speedBtn">⚡ Hız</button>
-                    </div>
-                </div>
-                <div class="error-overlay" id="errorOverlay">Yayın Hatası / Format Desteklenmiyor</div>
-            </div>
+        <div class="saved-panels" id="savedPanelsContainer">
+            <h3>📋 Kayıtlı Panellerim</h3>
+            <div id="savedPanelsList"></div>
         </div>
     </div>
 
-    <script>
-        // ==================== XTREAM API IPTV PLAYER (ES5 PURE VANILLA JS) ====================
-        (function() {
-            // ---------- GLOBAL DEĞİŞKENLER ----------
-            var PROXY_URL = "";  // CORS sorunu varsa başa eklenecek proxy
-            var API_BASE_URL = ""; // Sunucu adresi + /player_api.php eklenecek
-            var USERNAME = "";
-            var PASSWORD = "";
-            var XTREAM_URL = ""; // ana sunucu URL'si (dizi stream için gerekli)
+    <!-- Main Menu -->
+    <div id="mainMenuScreen" class="screen">
+        <button class="menu-btn" data-target="live">📺 CANLI TV</button>
+        <button class="menu-btn" data-target="vod">🎬 SİNEMA (VOD)</button>
+        <button class="menu-btn" data-target="series">📚 DİZİLER</button>
+    </div>
 
-            var currentScreen = "login"; // login, menu, list, seriesDetail, player
-            var currentListType = ""; // live, vod, series
-            var currentCategoryId = "";
-            var currentCategoryName = "";
-            var streamList = []; // mevcut kategorideki tüm akışlar (sayfalama için)
-            var currentPage = 1;
-            var itemsPerPage = 30;
-            var totalPages = 1;
+    <!-- List Screen (Live/VOD/Series Categories) -->
+    <div id="listScreen" class="screen">
+        <div class="sidebar" id="categorySidebar"></div>
+        <div class="content-panel">
+            <div class="content-header">
+                <span id="contentHeader">Kategoriler</span>
+                <button class="home-btn" id="listHomeBtn">🏠 ANA MENÜYE DÖN</button>
+            </div>
+            <div class="content-list" id="contentList"></div>
+            <div class="pagination" id="pagination"></div>
+        </div>
+    </div>
 
-            var currentSeriesId = "";
-            var currentSeriesInfo = null;
-            var selectedSeason = null;
-            var episodesList = [];
+    <!-- Seasons Screen -->
+    <div id="seasonsScreen" class="screen">
+        <div class="content-header" style="width:100%;">
+            <span id="seasonsHeader">Dizi Sezonları</span>
+            <button class="home-btn" id="seasonsHomeBtn">🏠 ANA MENÜYE DÖN</button>
+        </div>
+        <div class="seasons-grid" id="seasonsGrid"></div>
+        <button class="back-btn-text" id="seasonsBackBtn" style="margin:20px;">⬅ DİZİ LİSTESİNE DÖN</button>
+    </div>
 
-            // Player
-            var hideControlsTimeout = null;
-            var videoElement = null;
+    <!-- Episodes Screen -->
+    <div id="episodesScreen" class="screen">
+        <div class="episodes-header">
+            <span id="episodesHeader">Bölümler</span>
+            <button class="home-btn" id="episodesHomeBtn">🏠 ANA MENÜYE DÖN</button>
+        </div>
+        <div class="episodes-list" id="episodesListContainer"></div>
+        <button class="back-btn-text" id="episodesBackBtn" style="margin:20px;">⬅ SEZONLARA DÖN</button>
+    </div>
 
-            // ---------- YARDIMCI FONKSİYONLAR ----------
-            function formatTime(seconds) {
-                if (isNaN(seconds) || seconds < 0) return "00:00";
-                var h = Math.floor(seconds / 3600);
-                var m = Math.floor((seconds % 3600) / 60);
-                var s = Math.floor(seconds % 60);
-                var pad = function(num) { return (num < 10 ? "0" : "") + num; };
-                if (h > 0) {
-                    return pad(h) + ":" + pad(m) + ":" + pad(s);
-                } else {
-                    return pad(m) + ":" + pad(s);
-                }
-            }
+    <!-- Player -->
+    <div id="playerScreen" class="screen">
+        <div class="player-container" id="playerContainer">
+            <button class="back-btn" id="playerBackBtn">⬅ KANAL LİSTESİNE DÖN</button>
+            <video id="videoPlayer" preload="metadata"></video>
+            <div class="video-controls" id="videoControls">
+                <div class="progress-row">
+                    <span class="time-current" id="timeCurrent">00:00</span>
+                    <div class="progress-bar" id="progressBar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <span class="time-duration" id="timeDuration">00:00</span>
+                </div>
+                <div class="controls-row">
+                    <button class="ctrl-btn" id="playPauseBtn">▶</button>
+                    <span class="speed-indicator" id="speedIndicator">1.0x</span>
+                    <button class="ctrl-btn" id="speedBtn">⚡ Hız</button>
+                </div>
+            </div>
+            <div class="error-overlay" id="errorOverlay">Yayın Hatası / Format Desteklenmiyor</div>
+        </div>
+    </div>
+</div>
 
-            function getEl(id) {
-                return document.getElementById(id);
-            }
+<script>
+(function() {
+    // ========== GLOBAL DEĞİŞKENLER (ES5) ==========
+    var PROXY_URL = "";
+    var API_BASE_URL = "";
+    var USERNAME = "";
+    var PASSWORD = "";
+    var XTREAM_URL = "";
 
-            function showScreen(screenId) {
-                var screens = document.querySelectorAll('.screen');
-                for (var i = 0; i < screens.length; i++) {
-                    screens[i].classList.remove('active');
-                }
-                getEl(screenId).classList.add('active');
-                currentScreen = screenId.replace('Screen', '');
-            }
+    var currentScreen = "login"; // login, main_menu, list, seasons, episodes, player
+    var currentListType = "";    // live, vod, series
+    var currentCategoryId = "";
+    var currentCategoryName = "";
+    var streamList = [];
+    var currentPage = 1;
+    var itemsPerPage = 30;
+    var totalPages = 1;
 
-            // LocalStorage (ES5 uyumlu)
-            function saveCredentials(server, user, pass) {
-                try {
-                    localStorage.setItem('xtream_server', server);
-                    localStorage.setItem('xtream_username', user);
-                    localStorage.setItem('xtream_password', pass);
-                } catch(e) {}
-            }
+    var currentSeriesId = "";
+    var currentSeriesInfo = null; // { seasons: [], episodes: {} }
+    var currentSeasonNumber = null;
+    var currentEpisodes = [];
 
-            function loadCredentials() {
-                var server = localStorage.getItem('xtream_server');
-                var user = localStorage.getItem('xtream_username');
-                var pass = localStorage.getItem('xtream_password');
-                if (server && user && pass) {
-                    getEl('serverInput').value = server;
-                    getEl('usernameInput').value = user;
-                    getEl('passwordInput').value = pass;
-                    return true;
-                }
-                return false;
-            }
+    var historyStack = []; // geri navigasyon için
 
-            // AJAX (XMLHttpRequest)
-            function ajaxGet(url, onSuccess, onError) {
-                var xhr = new XMLHttpRequest();
-                xhr.open('GET', PROXY_URL + url, true);
-                xhr.timeout = 15000;
-                xhr.onreadystatechange = function() {
-                    if (xhr.readyState === 4) {
-                        if (xhr.status === 200) {
-                            try {
-                                var data = JSON.parse(xhr.responseText);
-                                onSuccess(data);
-                            } catch(e) {
-                                if (onError) onError("JSON parse error");
-                            }
-                        } else {
-                            if (onError) onError("HTTP " + xhr.status);
-                        }
-                    }
-                };
-                xhr.onerror = function() {
-                    if (onError) onError("Bağlantı hatası");
-                };
-                xhr.send();
-            }
+    // Player
+    var hideControlsTimeout = null;
+    var videoElement = null;
 
-            // ---------- GİRİŞ İŞLEMLERİ ----------
-            function doLogin() {
-                var server = getEl('serverInput').value.trim();
-                var user = getEl('usernameInput').value.trim();
-                var pass = getEl('passwordInput').value.trim();
-                var errorEl = getEl('loginError');
+    // ========== YARDIMCI FONKSİYONLAR ==========
+    function getEl(id) { return document.getElementById(id); }
 
-                if (!server || !user || !pass) {
-                    errorEl.textContent = 'Tüm alanları doldurun!';
-                    return;
-                }
+    function formatTime(seconds) {
+        if (isNaN(seconds) || seconds < 0) return "00:00";
+        var h = Math.floor(seconds / 3600);
+        var m = Math.floor((seconds % 3600) / 60);
+        var s = Math.floor(seconds % 60);
+        function pad(num) { return (num < 10 ? "0" : "") + num; }
+        if (h > 0) return pad(h) + ":" + pad(m) + ":" + pad(s);
+        return pad(m) + ":" + pad(s);
+    }
 
-                // URL'nin sonundaki / işaretini temizle
-                if (server.charAt(server.length - 1) === '/') {
-                    server = server.slice(0, -1);
-                }
-                XTREAM_URL = server; // ana URL
-                API_BASE_URL = server + '/player_api.php?username=' + encodeURIComponent(user) + '&password=' + encodeURIComponent(pass);
-                USERNAME = user;
-                PASSWORD = pass;
+    function showScreen(screenId, pushHistory) {
+        if (pushHistory === undefined) pushHistory = true;
+        var screens = document.querySelectorAll('.screen');
+        for (var i = 0; i < screens.length; i++) {
+            screens[i].classList.remove('active');
+        }
+        getEl(screenId).classList.add('active');
+    }
 
-                errorEl.textContent = 'Giriş yapılıyor...';
+    function navigateTo(screen, screenId, pushHistory) {
+        if (pushHistory === undefined) pushHistory = true;
+        if (pushHistory && currentScreen !== screen) {
+            historyStack.push(currentScreen);
+        }
+        currentScreen = screen;
+        showScreen(screenId, false);
+    }
 
-                // Hesap bilgisi çekerek doğrulama
-                ajaxGet(API_BASE_URL, function(data) {
-                    if (data.user_info && data.user_info.auth === 1) {
-                        // Başarılı
-                        saveCredentials(server, user, pass);
-                        errorEl.textContent = '';
-                        showScreen('menuScreen');
-                    } else {
-                        errorEl.textContent = 'Giriş başarısız! Bilgileri kontrol edin.';
-                    }
-                }, function(err) {
-                    errorEl.textContent = 'Hata: ' + err;
-                });
-            }
-
-            // ---------- MENÜ ----------
-            function onMenuClick(target) {
-                currentListType = target;
-                currentCategoryId = '';
-                currentPage = 1;
-                streamList = [];
-                if (target === 'live') {
-                    loadCategories('get_live_categories', 'Canlı TV Kategorileri');
-                } else if (target === 'vod') {
-                    loadCategories('get_vod_categories', 'VOD Kategorileri');
-                } else if (target === 'series') {
-                    loadCategories('get_series_categories', 'Dizi Kategorileri');
-                }
-                showScreen('listScreen');
-            }
-
-            // Kategorileri yükle
-            function loadCategories(action, headerTitle) {
-                getEl('contentHeader').textContent = headerTitle;
-                getEl('categorySidebar').innerHTML = '';
-                getEl('contentList').innerHTML = '';
-                getEl('pagination').innerHTML = '';
-
-                var url = API_BASE_URL + '&action=' + action;
-                ajaxGet(url, function(data) {
-                    var cats = data || [];
-                    var sidebar = getEl('categorySidebar');
-                    sidebar.innerHTML = '';
-                    for (var i = 0; i < cats.length; i++) {
-                        var cat = cats[i];
-                        var div = document.createElement('div');
-                        div.className = 'cat-item';
-                        div.textContent = cat.category_name;
-                        div.setAttribute('data-cat-id', cat.category_id);
-                        div.onclick = function(e) {
-                            var id = this.getAttribute('data-cat-id');
-                            var name = this.textContent;
-                            selectCategory(id, name);
-                        };
-                        sidebar.appendChild(div);
-                    }
-                    // Eğer kategori varsa ilkini seç
-                    if (cats.length > 0) {
-                        selectCategory(cats[0].category_id, cats[0].category_name);
-                    }
-                });
-            }
-
-            function selectCategory(catId, catName) {
-                currentCategoryId = catId;
-                currentCategoryName = catName;
-                currentPage = 1;
-                // Sidebar'da aktif işaretle
-                var items = document.querySelectorAll('#categorySidebar .cat-item');
-                for (var i = 0; i < items.length; i++) {
-                    items[i].classList.remove('active');
-                    if (items[i].getAttribute('data-cat-id') == catId) {
-                        items[i].classList.add('active');
-                    }
-                }
-                loadStreamsForCategory();
-            }
-
-            function loadStreamsForCategory() {
-                var action = '';
-                if (currentListType === 'live') action = 'get_live_streams';
-                else if (currentListType === 'vod') action = 'get_vod_streams';
-                else if (currentListType === 'series') action = 'get_series';
-                else return;
-
-                var url = API_BASE_URL + '&action=' + action + '&category_id=' + currentCategoryId;
-                getEl('contentList').innerHTML = 'Yükleniyor...';
-                getEl('pagination').innerHTML = '';
-
-                ajaxGet(url, function(data) {
-                    streamList = data || [];
-                    totalPages = Math.ceil(streamList.length / itemsPerPage);
-                    if (totalPages < 1) totalPages = 1;
-                    currentPage = 1;
-                    renderPage();
-                });
-            }
-
-            function renderPage() {
-                var listEl = getEl('contentList');
-                listEl.innerHTML = '';
-                var start = (currentPage - 1) * itemsPerPage;
-                var end = Math.min(start + itemsPerPage, streamList.length);
-                var slice = streamList.slice(start, end);
-
-                for (var i = 0; i < slice.length; i++) {
-                    var item = slice[i];
-                    var div = document.createElement('div');
-                    div.className = 'stream-item';
-                    var numSpan = document.createElement('span');
-                    numSpan.className = 'num';
-                    numSpan.textContent = (start + i + 1);
-                    var nameSpan = document.createElement('span');
-                    nameSpan.className = 'name';
-                    nameSpan.textContent = item.name || item.title || 'İsimsiz';
-                    div.appendChild(numSpan);
-                    div.appendChild(nameSpan);
-
-                    div.onclick = (function(itemCopy) {
-                        return function() {
-                            onStreamClick(itemCopy);
-                        };
-                    })(item);
-
-                    listEl.appendChild(div);
-                }
-
-                // Sayfalama kontrolleri
-                var paginationEl = getEl('pagination');
-                paginationEl.innerHTML = '';
-                var prevBtn = document.createElement('button');
-                prevBtn.textContent = '◄ Önceki';
-                prevBtn.disabled = (currentPage === 1);
-                prevBtn.onclick = function() {
-                    if (currentPage > 1) {
-                        currentPage--;
-                        renderPage();
-                        getEl('contentList').scrollTop = 0;
-                    }
-                };
-                var pageInfo = document.createElement('span');
-                pageInfo.className = 'page-info';
-                pageInfo.textContent = currentPage + ' / ' + totalPages;
-                var nextBtn = document.createElement('button');
-                nextBtn.textContent = 'Sonraki ►';
-                nextBtn.disabled = (currentPage === totalPages);
-                nextBtn.onclick = function() {
-                    if (currentPage < totalPages) {
-                        currentPage++;
-                        renderPage();
-                        getEl('contentList').scrollTop = 0;
-                    }
-                };
-                paginationEl.appendChild(prevBtn);
-                paginationEl.appendChild(pageInfo);
-                paginationEl.appendChild(nextBtn);
-            }
-
-            function onStreamClick(item) {
-                if (currentListType === 'series') {
-                    // Dizi detayına git
-                    currentSeriesId = item.series_id;
-                    loadSeriesInfo(currentSeriesId);
-                } else {
-                    // Canlı TV veya VOD: doğrudan oynat
-                    var streamUrl = '';
-                    if (currentListType === 'live') {
-                        // Canlı TV yayını: genelde stream_type ve stream_url vardır.
-                        // Xtream API canlı için doğrudan link dönebilir.
-                        if (item.stream_type === 'live' || item.stream_type === 'movie') {
-                            streamUrl = item.stream_url || (XTREAM_URL + '/live/' + USERNAME + '/' + PASSWORD + '/' + item.stream_id + '.ts');
-                        } else {
-                            streamUrl = item.stream_url || (XTREAM_URL + '/movie/' + USERNAME + '/' + PASSWORD + '/' + item.stream_id + '.' + (item.container_extension || 'mp4'));
-                        }
-                    } else if (currentListType === 'vod') {
-                        streamUrl = item.stream_url || (XTREAM_URL + '/movie/' + USERNAME + '/' + PASSWORD + '/' + item.stream_id + '.' + (item.container_extension || 'mp4'));
-                    }
-                    openPlayer(streamUrl, item.name || item.title);
-                }
-            }
-
-            // ---------- DİZİ DETAY İŞLEMLERİ ----------
-            function loadSeriesInfo(seriesId) {
-                showScreen('seriesDetailScreen');
-                getEl('seriesDetailHeader').textContent = 'Dizi Yükleniyor...';
-                getEl('seasonsSidebar').innerHTML = '';
-                getEl('episodesList').innerHTML = '';
-                var url = API_BASE_URL + '&action=get_series_info&series_id=' + seriesId;
-                ajaxGet(url, function(data) {
-                    currentSeriesInfo = data;
-                    if (data.info && data.info.name) {
-                        getEl('seriesDetailHeader').textContent = data.info.name;
-                    }
-                    // Sezonları listele (seasons dizisi varsa)
-                    var seasons = data.seasons || [];
-                    var sidebar = getEl('seasonsSidebar');
-                    sidebar.innerHTML = '';
-                    for (var i = 0; i < seasons.length; i++) {
-                        var season = seasons[i];
-                        var div = document.createElement('div');
-                        div.className = 'cat-item';
-                        div.textContent = season.name || ('Sezon ' + season.season_number);
-                        div.setAttribute('data-season', season.season_number);
-                        div.onclick = function() {
-                            var seasonNum = this.getAttribute('data-season');
-                            onSeasonClick(seasonNum);
-                        };
-                        sidebar.appendChild(div);
-                    }
-                    if (seasons.length > 0) {
-                        onSeasonClick(seasons[0].season_number);
-                    } else {
-                        getEl('episodesList').innerHTML = 'Bölüm bulunamadı.';
-                    }
-                });
-            }
-
-            function onSeasonClick(seasonNumber) {
-                selectedSeason = seasonNumber;
-                // sidebar aktif
-                var items = document.querySelectorAll('#seasonsSidebar .cat-item');
-                for (var i = 0; i < items.length; i++) {
-                    items[i].classList.remove('active');
-                    if (items[i].getAttribute('data-season') == seasonNumber) {
-                        items[i].classList.add('active');
-                    }
-                }
-                // Bölümleri al
-                var episodesObj = currentSeriesInfo.episodes || {};
-                episodesList = episodesObj[seasonNumber] || [];
-                renderEpisodes();
-            }
-
-            function renderEpisodes() {
-                var container = getEl('episodesList');
-                container.innerHTML = '';
-                if (episodesList.length === 0) {
-                    container.innerHTML = 'Bu sezonda bölüm yok.';
-                    return;
-                }
-                for (var i = 0; i < episodesList.length; i++) {
-                    var ep = episodesList[i];
-                    var div = document.createElement('div');
-                    div.className = 'episode-item';
-                    div.textContent = (ep.title || ('Bölüm ' + ep.episode_num));
-                    div.onclick = (function(epCopy) {
-                        return function() {
-                            playEpisode(epCopy);
-                        };
-                    })(ep);
-                    container.appendChild(div);
-                }
-            }
-
-            function playEpisode(ep) {
-                var containerExt = ep.container_extension || 'mp4';
-                var streamUrl = XTREAM_URL + '/series/' + USERNAME + '/' + PASSWORD + '/' + ep.id + '.' + containerExt;
-                var title = ep.title || 'Bölüm';
-                openPlayer(streamUrl, title);
-            }
-
-            // ---------- VİDEO PLAYER ----------
-            function openPlayer(url, title) {
-                showScreen('playerScreen');
-                videoElement = getEl('videoPlayer');
-                var errorOverlay = getEl('errorOverlay');
-                errorOverlay.style.display = 'none';
-                videoElement.src = url;
+    function goBack() {
+        if (currentScreen === 'player') {
+            // Videoyu durdur ve temizle
+            if (videoElement) {
+                videoElement.pause();
+                videoElement.src = '';
                 videoElement.load();
-                videoElement.play();
-
-                // History push state for back button
-                if (window.history && window.history.pushState) {
-                    window.history.pushState({ playerOpen: true }, '', '#player');
-                }
-
-                // Kontrolleri göster
-                showControlsTemporarily();
-                updatePlayPauseButton();
             }
-
-            function closePlayer() {
-                if (videoElement) {
-                    videoElement.pause();
-                    videoElement.src = '';
-                    videoElement.load();
-                }
-                // History geri al
-                if (window.history && window.history.state && window.history.state.playerOpen) {
-                    window.history.back();
-                }
-                showScreen('listScreen');
-                // State düzeltmesi
-                currentScreen = 'list';
+            // Player'dan çıkarken önceki ekrana dön
+        }
+        if (historyStack.length > 0) {
+            var prev = historyStack.pop();
+            // prev değeri string, uygun screenId'yi bul
+            var screenMap = {
+                'login': 'loginScreen',
+                'main_menu': 'mainMenuScreen',
+                'list': 'listScreen',
+                'seasons': 'seasonsScreen',
+                'episodes': 'episodesScreen',
+                'player': 'playerScreen'
+            };
+            var targetId = screenMap[prev] || 'mainMenuScreen';
+            currentScreen = prev;
+            showScreen(targetId, false);
+            // Eğer listScreen'e dönüyorsak sayfalamayı koru, gerekirse yeniden render etmeyiz,
+            // çünkü içerik zaten duruyor olabilir. Ama güvenlik için renderPage yapmayalım.
+            if (prev === 'seasons' && currentSeriesInfo) {
+                // seasons ekranına dönüldüğünde mevcut içerik zaten duruyor, ekstra işlem yok.
             }
+        } else {
+            // Ana menüye dön
+            currentScreen = 'main_menu';
+            showScreen('mainMenuScreen', false);
+        }
+    }
 
-            function showControlsTemporarily() {
-                var container = getEl('playerContainer');
-                container.classList.add('show-controls');
-                if (hideControlsTimeout) clearTimeout(hideControlsTimeout);
-                hideControlsTimeout = setTimeout(function() {
-                    container.classList.remove('show-controls');
-                }, 5000);
-            }
-
-            function updatePlayPauseButton() {
-                var btn = getEl('playPauseBtn');
-                if (videoElement && videoElement.paused) {
-                    btn.textContent = '▶';
+    // AJAX (XMLHttpRequest)
+    function ajaxGet(url, onSuccess, onError) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', PROXY_URL + url, true);
+        xhr.timeout = 15000;
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    try {
+                        var data = JSON.parse(xhr.responseText);
+                        onSuccess(data);
+                    } catch(e) {
+                        if (onError) onError("JSON parse error");
+                    }
                 } else {
-                    btn.textContent = '⏸';
+                    if (onError) onError("HTTP " + xhr.status);
                 }
             }
+        };
+        xhr.onerror = function() { if (onError) onError("Bağlantı hatası"); };
+        xhr.send();
+    }
 
-            // Video event listeners
-            function setupVideoEvents() {
-                videoElement = getEl('videoPlayer');
-                videoElement.addEventListener('timeupdate', function() {
-                    var current = videoElement.currentTime;
-                    var duration = videoElement.duration;
-                    getEl('timeCurrent').textContent = formatTime(current);
-                    if (duration && !isNaN(duration)) {
-                        getEl('timeDuration').textContent = formatTime(duration);
-                        var percent = (current / duration) * 100;
-                        getEl('progressFill').style.width = percent + '%';
-                    }
-                });
+    // ========== PANEL KAYDETME / YÜKLEME ==========
+    function loadSavedPanels() {
+        var panelsStr = localStorage.getItem('iptv_panels');
+        if (!panelsStr) return [];
+        try {
+            var panels = JSON.parse(panelsStr);
+            return panels || [];
+        } catch(e) { return []; }
+    }
 
-                videoElement.addEventListener('loadedmetadata', function() {
-                    getEl('timeDuration').textContent = formatTime(videoElement.duration);
-                });
-
-                videoElement.addEventListener('play', updatePlayPauseButton);
-                videoElement.addEventListener('pause', updatePlayPauseButton);
-                videoElement.addEventListener('ended', function() {
-                    updatePlayPauseButton();
-                });
-
-                videoElement.addEventListener('error', function() {
-                    getEl('errorOverlay').style.display = 'block';
-                }, false);
+    function savePanel(panelName, server, user, pass) {
+        var panels = loadSavedPanels();
+        // Aynı isimde varsa güncelle, yoksa ekle
+        var found = false;
+        for (var i = 0; i < panels.length; i++) {
+            if (panels[i].name === panelName) {
+                panels[i].server = server;
+                panels[i].username = user;
+                panels[i].password = pass;
+                found = true;
+                break;
             }
+        }
+        if (!found) {
+            panels.push({ name: panelName, server: server, username: user, password: pass });
+        }
+        localStorage.setItem('iptv_panels', JSON.stringify(panels));
+        renderSavedPanels();
+    }
 
-            // Player controls UI
-            function initPlayerControls() {
-                // Play/Pause
-                getEl('playPauseBtn').onclick = function() {
-                    if (videoElement.paused) {
-                        videoElement.play();
-                    } else {
-                        videoElement.pause();
-                    }
-                    updatePlayPauseButton();
-                    showControlsTemporarily();
+    function renderSavedPanels() {
+        var container = getEl('savedPanelsList');
+        if (!container) return;
+        container.innerHTML = '';
+        var panels = loadSavedPanels();
+        if (panels.length === 0) {
+            container.innerHTML = '<div style="padding:10px;color:#888;">Henüz kayıtlı panel yok.</div>';
+            return;
+        }
+        for (var i = 0; i < panels.length; i++) {
+            (function(panel) {
+                var div = document.createElement('div');
+                div.className = 'saved-panel-item';
+                div.textContent = panel.name + ' (' + panel.server + ')';
+                div.onclick = function() {
+                    // Otomatik giriş
+                    getEl('panelNameInput').value = panel.name;
+                    getEl('serverInput').value = panel.server;
+                    getEl('usernameInput').value = panel.username;
+                    getEl('passwordInput').value = panel.password;
+                    doLogin();
                 };
+                container.appendChild(div);
+            })(panels[i]);
+        }
+    }
 
-                // Speed button
-                getEl('speedBtn').onclick = function() {
-                    var rates = [1.0, 1.5, 2.0];
-                    var current = videoElement.playbackRate;
-                    var idx = rates.indexOf(current);
-                    var newRate = rates[(idx + 1) % rates.length];
-                    videoElement.playbackRate = newRate;
-                    getEl('speedIndicator').textContent = newRate.toFixed(1) + 'x';
-                    showControlsTemporarily();
-                };
+    // ========== GİRİŞ İŞLEMLERİ ==========
+    function doLogin() {
+        var panelName = getEl('panelNameInput').value.trim();
+        var server = getEl('serverInput').value.trim();
+        var user = getEl('usernameInput').value.trim();
+        var pass = getEl('passwordInput').value.trim();
+        var errorEl = getEl('loginError');
 
-                // Progress bar click
-                getEl('progressBar').onclick = function(e) {
-                    var rect = this.getBoundingClientRect();
-                    var clickX = e.clientX - rect.left;
-                    var width = rect.width;
-                    var duration = videoElement.duration;
-                    if (duration && !isNaN(duration)) {
-                        videoElement.currentTime = (clickX / width) * duration;
-                    }
-                    showControlsTemporarily();
-                };
+        if (!panelName) { errorEl.textContent = 'Panel adı girin!'; return; }
+        if (!server || !user || !pass) { errorEl.textContent = 'Tüm alanları doldurun!'; return; }
 
-                // Back button
-                getEl('playerBackBtn').onclick = function() {
-                    closePlayer();
-                };
+        if (server.charAt(server.length - 1) === '/') server = server.slice(0, -1);
+        XTREAM_URL = server;
+        API_BASE_URL = server + '/player_api.php?username=' + encodeURIComponent(user) + '&password=' + encodeURIComponent(pass);
+        USERNAME = user;
+        PASSWORD = pass;
 
-                // Mouse/kbd activity shows controls
-                var container = getEl('playerContainer');
-                container.onmousemove = showControlsTemporarily;
-                container.onmousedown = showControlsTemporarily;
-                container.onclick = showControlsTemporarily;
+        errorEl.textContent = 'Giriş yapılıyor...';
 
-                // Keyboard controls
-                window.addEventListener('keydown', function(e) {
-                    if (currentScreen === 'player') {
-                        var key = e.keyCode;
-                        // Arrow left: 37, right: 39, enter: 13, escape: 27
-                        if (key === 37) { // left
-                            videoElement.currentTime = Math.max(0, videoElement.currentTime - 10);
-                            showControlsTemporarily();
-                            e.preventDefault();
-                        } else if (key === 39) { // right
-                            videoElement.currentTime = Math.min(videoElement.duration, videoElement.currentTime + 10);
-                            showControlsTemporarily();
-                            e.preventDefault();
-                        } else if (key === 13) { // enter
-                            if (videoElement.paused) videoElement.play();
-                            else videoElement.pause();
-                            updatePlayPauseButton();
-                            showControlsTemporarily();
-                            e.preventDefault();
-                        } else if (key === 27 || key === 461) { // escape veya LG back
-                            closePlayer();
-                            e.preventDefault();
-                        }
-                    }
-                });
-
-                // window popstate (back button)
-                window.onpopstate = function(event) {
-                    if (currentScreen === 'player') {
-                        closePlayer();
-                    }
-                };
-            }
-
-            // ---------- OLAY BAĞLAMALARI ----------
-            function bindEvents() {
-                // Login
-                getEl('loginBtn').addEventListener('click', doLogin);
-                // Enter tuşu ile login
-                var inputs = [getEl('serverInput'), getEl('usernameInput'), getEl('passwordInput')];
-                for (var i = 0; i < inputs.length; i++) {
-                    inputs[i].addEventListener('keypress', function(e) {
-                        if (e.keyCode === 13) doLogin();
-                    });
-                }
-
-                // Menu buttons
-                var menuBtns = document.querySelectorAll('#menuScreen .menu-btn');
-                for (var j = 0; j < menuBtns.length; j++) {
-                    menuBtns[j].addEventListener('click', function() {
-                        var target = this.getAttribute('data-target');
-                        onMenuClick(target);
-                    });
-                }
-
-                // Back to series list button
-                getEl('backToSeriesBtn').addEventListener('click', function() {
-                    showScreen('listScreen');
-                    currentScreen = 'list';
-                });
-
-                // Video events
-                setupVideoEvents();
-                initPlayerControls();
-            }
-
-            // ---------- BAŞLANGIÇ ----------
-            function init() {
-                loadCredentials();
-                bindEvents();
-                showScreen('loginScreen');
-            }
-
-            // Sayfa yüklendiğinde başlat
-            if (document.readyState === 'complete' || document.readyState === 'interactive') {
-                init();
+        ajaxGet(API_BASE_URL, function(data) {
+            if (data.user_info && data.user_info.auth === 1) {
+                savePanel(panelName, server, user, pass);
+                errorEl.textContent = '';
+                // Başarılı giriş, ana menüye geç
+                historyStack = []; // temizle
+                navigateTo('main_menu', 'mainMenuScreen', false);
             } else {
-                window.onload = init;
+                errorEl.textContent = 'Giriş başarısız! Bilgileri kontrol edin.';
             }
-        })();
-    </script>
+        }, function(err) {
+            errorEl.textContent = 'Hata: ' + err;
+        });
+    }
+
+    // ========== MENÜ İŞLEMLERİ ==========
+    function onMainMenuClick(target) {
+        currentListType = target;
+        currentCategoryId = '';
+        currentPage = 1;
+        streamList = [];
+        historyStack = ['main_menu']; // ana menüden listeye geçerken stack'i sıfırla, geri tuşu ana menüye dönsün
+        if (target === 'live') {
+            loadCategories('get_live_categories', 'Canlı TV Kategorileri');
+        } else if (target === 'vod') {
+            loadCategories('get_vod_categories', 'VOD Kategorileri');
+        } else if (target === 'series') {
+            loadCategories('get_series_categories', 'Dizi Kategorileri');
+        }
+        navigateTo('list', 'listScreen', false);
+    }
+
+    function loadCategories(action, headerTitle) {
+        getEl('contentHeader').textContent = headerTitle;
+        getEl('categorySidebar').innerHTML = '';
+        getEl('contentList').innerHTML = '';
+        getEl('pagination').innerHTML = '';
+        var url = API_BASE_URL + '&action=' + action;
+        ajaxGet(url, function(data) {
+            var cats = data || [];
+            var sidebar = getEl('categorySidebar');
+            for (var i = 0; i < cats.length; i++) {
+                var cat = cats[i];
+                var div = document.createElement('div');
+                div.className = 'cat-item';
+                div.textContent = cat.category_name;
+                div.setAttribute('data-cat-id', cat.category_id);
+                div.onclick = (function(id, name) {
+                    return function() { selectCategory(id, name); };
+                })(cat.category_id, cat.category_name);
+                sidebar.appendChild(div);
+            }
+            if (cats.length > 0) {
+                selectCategory(cats[0].category_id, cats[0].category_name);
+            }
+        });
+    }
+
+    function selectCategory(catId, catName) {
+        currentCategoryId = catId;
+        currentCategoryName = catName;
+        currentPage = 1;
+        var items = document.querySelectorAll('#categorySidebar .cat-item');
+        for (var i = 0; i < items.length; i++) {
+            items[i].classList.remove('active');
+            if (items[i].getAttribute('data-cat-id') == catId) {
+                items[i].classList.add('active');
+            }
+        }
+        loadStreamsForCategory();
+    }
+
+    function loadStreamsForCategory() {
+        var action = '';
+        if (currentListType === 'live') action = 'get_live_streams';
+        else if (currentListType === 'vod') action = 'get_vod_streams';
+        else if (currentListType === 'series') action = 'get_series';
+        var url = API_BASE_URL + '&action=' + action + '&category_id=' + currentCategoryId;
+        getEl('contentList').innerHTML = 'Yükleniyor...';
+        getEl('pagination').innerHTML = '';
+        ajaxGet(url, function(data) {
+            streamList = data || [];
+            totalPages = Math.ceil(streamList.length / itemsPerPage) || 1;
+            currentPage = 1;
+            renderPage();
+        });
+    }
+
+    function renderPage() {
+        var listEl = getEl('contentList');
+        listEl.innerHTML = '';
+        var start = (currentPage - 1) * itemsPerPage;
+        var end = Math.min(start + itemsPerPage, streamList.length);
+        var slice = streamList.slice(start, end);
+        for (var i = 0; i < slice.length; i++) {
+            var item = slice[i];
+            var div = document.createElement('div');
+            div.className = 'stream-item';
+            var numSpan = document.createElement('span');
+            numSpan.className = 'num';
+            numSpan.textContent = (start + i + 1);
+            var nameSpan = document.createElement('span');
+            nameSpan.className = 'name';
+            nameSpan.textContent = item.name || item.title || 'İsimsiz';
+            div.appendChild(numSpan);
+            div.appendChild(nameSpan);
+            div.onclick = (function(it) {
+                return function() { onStreamClick(it); };
+            })(item);
+            listEl.appendChild(div);
+        }
+        var pag = getEl('pagination');
+        pag.innerHTML = '';
+        var prevBtn = document.createElement('button');
+        prevBtn.textContent = '◄ Önceki';
+        prevBtn.disabled = (currentPage === 1);
+        prevBtn.onclick = function() { if (currentPage > 1) { currentPage--; renderPage(); listEl.scrollTop = 0; } };
+        var pageInfo = document.createElement('span');
+        pageInfo.className = 'page-info';
+        pageInfo.textContent = currentPage + ' / ' + totalPages;
+        var nextBtn = document.createElement('button');
+        nextBtn.textContent = 'Sonraki ►';
+        nextBtn.disabled = (currentPage === totalPages);
+        nextBtn.onclick = function() { if (currentPage < totalPages) { currentPage++; renderPage(); listEl.scrollTop = 0; } };
+        pag.appendChild(prevBtn);
+        pag.appendChild(pageInfo);
+        pag.appendChild(nextBtn);
+    }
+
+    function onStreamClick(item) {
+        if (currentListType === 'series') {
+            currentSeriesId = item.series_id;
+            loadSeriesSeasons(currentSeriesId);
+        } else {
+            var streamUrl = '';
+            if (currentListType === 'live') {
+                if (item.stream_type === 'live' || item.stream_type === 'movie') {
+                    streamUrl = item.stream_url || (XTREAM_URL + '/live/' + USERNAME + '/' + PASSWORD + '/' + item.stream_id + '.ts');
+                } else {
+                    streamUrl = item.stream_url || (XTREAM_URL + '/movie/' + USERNAME + '/' + PASSWORD + '/' + item.stream_id + '.' + (item.container_extension || 'mp4'));
+                }
+            } else if (currentListType === 'vod') {
+                streamUrl = item.stream_url || (XTREAM_URL + '/movie/' + USERNAME + '/' + PASSWORD + '/' + item.stream_id + '.' + (item.container_extension || 'mp4'));
+            }
+            openPlayer(streamUrl, item.name || item.title);
+        }
+    }
+
+    // ========== DİZİ İŞLEMLERİ (SADECE ES5 for...in) ==========
+    function loadSeriesSeasons(seriesId) {
+        var url = API_BASE_URL + '&action=get_series_info&series_id=' + seriesId;
+        getEl('seasonsHeader').textContent = 'Yükleniyor...';
+        navigateTo('seasons', 'seasonsScreen');
+        ajaxGet(url, function(data) {
+            currentSeriesInfo = data;
+            if (data.info && data.info.name) {
+                getEl('seasonsHeader').textContent = data.info.name;
+            }
+            renderSeasons(data);
+        });
+    }
+
+    function renderSeasons(data) {
+        var grid = getEl('seasonsGrid');
+        grid.innerHTML = '';
+        // seasons dizisi yoksa episodes anahtarlarından üret
+        var seasons = data.seasons;
+        if (!seasons || seasons.length === 0) {
+            // episodes nesnesinden sezon numaralarını çıkar (ES5 for...in)
+            var episodesObj = data.episodes || {};
+            var seasonNums = [];
+            for (var sn in episodesObj) {
+                if (episodesObj.hasOwnProperty(sn)) {
+                    seasonNums.push(sn);
+                }
+            }
+            // sırala
+            seasonNums.sort(function(a,b){ return parseInt(a)-parseInt(b); });
+            for (var i = 0; i < seasonNums.length; i++) {
+                var snum = seasonNums[i];
+                var div = document.createElement('div');
+                div.className = 'season-box';
+                div.textContent = 'Sezon ' + snum;
+                div.onclick = (function(seasonNum) {
+                    return function() { onSeasonClick(seasonNum); };
+                })(snum);
+                grid.appendChild(div);
+            }
+        } else {
+            for (var j = 0; j < seasons.length; j++) {
+                var season = seasons[j];
+                var snum = season.season_number;
+                var div = document.createElement('div');
+                div.className = 'season-box';
+                div.textContent = season.name || ('Sezon ' + snum);
+                div.onclick = (function(seasonNum) {
+                    return function() { onSeasonClick(seasonNum); };
+                })(snum);
+                grid.appendChild(div);
+            }
+        }
+    }
+
+    function onSeasonClick(seasonNumber) {
+        currentSeasonNumber = seasonNumber;
+        // episodes nesnesinden bölümleri al (ES5 for...in)
+        var episodesObj = currentSeriesInfo.episodes || {};
+        currentEpisodes = [];
+        // seasonNumber string olabilir, objede anahtar string
+        var key = String(seasonNumber);
+        if (episodesObj[key]) {
+            currentEpisodes = episodesObj[key];
+        } else {
+            // bazı API'ler sayı olarak dönebilir
+            for (var k in episodesObj) {
+                if (episodesObj.hasOwnProperty(k) && parseInt(k) === parseInt(seasonNumber)) {
+                    currentEpisodes = episodesObj[k];
+                    break;
+                }
+            }
+        }
+        renderEpisodes();
+        navigateTo('episodes', 'episodesScreen');
+    }
+
+    function renderEpisodes() {
+        getEl('episodesHeader').textContent = 'Sezon ' + currentSeasonNumber + ' Bölümleri';
+        var container = getEl('episodesListContainer');
+        container.innerHTML = '';
+        if (currentEpisodes.length === 0) {
+            container.innerHTML = '<div style="padding:20px;">Bölüm bulunamadı.</div>';
+            return;
+        }
+        for (var i = 0; i < currentEpisodes.length; i++) {
+            var ep = currentEpisodes[i];
+            var div = document.createElement('div');
+            div.className = 'episode-item';
+            div.textContent = (ep.title || ('Bölüm ' + ep.episode_num));
+            div.onclick = (function(epCopy) {
+                return function() { playEpisode(epCopy); };
+            })(ep);
+            container.appendChild(div);
+        }
+    }
+
+    function playEpisode(ep) {
+        var containerExt = ep.container_extension || 'mp4';
+        var streamUrl = XTREAM_URL + '/series/' + USERNAME + '/' + PASSWORD + '/' + ep.id + '.' + containerExt;
+        openPlayer(streamUrl, ep.title || 'Bölüm');
+    }
+
+    // ========== PLAYER İŞLEMLERİ ==========
+    function openPlayer(url, title) {
+        navigateTo('player', 'playerScreen');
+        videoElement = getEl('videoPlayer');
+        getEl('errorOverlay').style.display = 'none';
+        videoElement.src = url;
+        videoElement.load();
+        videoElement.play();
+        if (window.history && window.history.pushState) {
+            window.history.pushState({ playerOpen: true }, '', '#player');
+        }
+        showControlsTemporarily();
+        updatePlayPauseButton();
+    }
+
+    function closePlayerAndGoBack() {
+        if (videoElement) {
+            videoElement.pause();
+            videoElement.src = '';
+            videoElement.load();
+        }
+        if (window.history && window.history.state && window.history.state.playerOpen) {
+            window.history.back();
+        }
+        goBack();
+    }
+
+    function showControlsTemporarily() {
+        var container = getEl('playerContainer');
+        container.classList.add('show-controls');
+        if (hideControlsTimeout) clearTimeout(hideControlsTimeout);
+        hideControlsTimeout = setTimeout(function() {
+            container.classList.remove('show-controls');
+        }, 5000);
+    }
+
+    function updatePlayPauseButton() {
+        var btn = getEl('playPauseBtn');
+        if (videoElement && videoElement.paused) btn.textContent = '▶';
+        else btn.textContent = '⏸';
+    }
+
+    function setupPlayerEvents() {
+        videoElement = getEl('videoPlayer');
+        videoElement.addEventListener('timeupdate', function() {
+            var cur = videoElement.currentTime;
+            var dur = videoElement.duration;
+            getEl('timeCurrent').textContent = formatTime(cur);
+            if (dur && !isNaN(dur)) {
+                getEl('timeDuration').textContent = formatTime(dur);
+                getEl('progressFill').style.width = ((cur / dur) * 100) + '%';
+            }
+        });
+        videoElement.addEventListener('loadedmetadata', function() {
+            getEl('timeDuration').textContent = formatTime(videoElement.duration);
+        });
+        videoElement.addEventListener('play', updatePlayPauseButton);
+        videoElement.addEventListener('pause', updatePlayPauseButton);
+        videoElement.addEventListener('ended', updatePlayPauseButton);
+        videoElement.addEventListener('error', function() {
+            getEl('errorOverlay').style.display = 'block';
+        });
+    }
+
+    function initPlayerControls() {
+        getEl('playPauseBtn').onclick = function() {
+            if (videoElement.paused) videoElement.play(); else videoElement.pause();
+            updatePlayPauseButton();
+            showControlsTemporarily();
+        };
+        getEl('speedBtn').onclick = function() {
+            var rates = [1.0, 1.5, 2.0];
+            var cur = videoElement.playbackRate;
+            var idx = rates.indexOf(cur);
+            var newRate = rates[(idx + 1) % rates.length];
+            videoElement.playbackRate = newRate;
+            getEl('speedIndicator').textContent = newRate.toFixed(1) + 'x';
+            showControlsTemporarily();
+        };
+        getEl('progressBar').onclick = function(e) {
+            var rect = this.getBoundingClientRect();
+            var clickX = e.clientX - rect.left;
+            var width = rect.width;
+            var dur = videoElement.duration;
+            if (dur && !isNaN(dur)) videoElement.currentTime = (clickX / width) * dur;
+            showControlsTemporarily();
+        };
+        getEl('playerBackBtn').onclick = function() { closePlayerAndGoBack(); };
+
+        var container = getEl('playerContainer');
+        container.onmousemove = showControlsTemporarily;
+        container.onmousedown = showControlsTemporarily;
+        container.onclick = showControlsTemporarily;
+
+        window.addEventListener('keydown', function(e) {
+            if (currentScreen === 'player') {
+                var key = e.keyCode;
+                if (key === 37) { videoElement.currentTime = Math.max(0, videoElement.currentTime - 10); showControlsTemporarily(); e.preventDefault(); }
+                else if (key === 39) { videoElement.currentTime = Math.min(videoElement.duration, videoElement.currentTime + 10); showControlsTemporarily(); e.preventDefault(); }
+                else if (key === 13) { if (videoElement.paused) videoElement.play(); else videoElement.pause(); updatePlayPauseButton(); showControlsTemporarily(); e.preventDefault(); }
+                else if (key === 27 || key === 461) { closePlayerAndGoBack(); e.preventDefault(); }
+            }
+        });
+        window.onpopstate = function(event) {
+            if (currentScreen === 'player') closePlayerAndGoBack();
+        };
+    }
+
+    // ========== ANA MENÜYE DÖN BUTONLARI ==========
+    function bindHomeButtons() {
+        getEl('listHomeBtn').onclick = function() {
+            historyStack = [];
+            navigateTo('main_menu', 'mainMenuScreen', false);
+        };
+        getEl('seasonsHomeBtn').onclick = function() {
+            historyStack = [];
+            navigateTo('main_menu', 'mainMenuScreen', false);
+        };
+        getEl('episodesHomeBtn').onclick = function() {
+            historyStack = [];
+            navigateTo('main_menu', 'mainMenuScreen', false);
+        };
+        // Geri butonları (stack kullanarak)
+        getEl('seasonsBackBtn').onclick = function() { goBack(); };
+        getEl('episodesBackBtn').onclick = function() { goBack(); };
+    }
+
+    // ========== BAŞLANGIÇ ==========
+    function init() {
+        // Kayıtlı panelleri göster
+        renderSavedPanels();
+        // Login buton
+        getEl('loginBtn').addEventListener('click', doLogin);
+        var inputs = [getEl('panelNameInput'), getEl('serverInput'), getEl('usernameInput'), getEl('passwordInput')];
+        for (var i = 0; i < inputs.length; i++) {
+            inputs[i].addEventListener('keypress', function(e) {
+                if (e.keyCode === 13) doLogin();
+            });
+        }
+        // Ana menü butonları
+        var menuBtns = document.querySelectorAll('#mainMenuScreen .menu-btn');
+        for (var j = 0; j < menuBtns.length; j++) {
+            menuBtns[j].addEventListener('click', function() {
+                var target = this.getAttribute('data-target');
+                onMainMenuClick(target);
+            });
+        }
+        bindHomeButtons();
+        setupPlayerEvents();
+        initPlayerControls();
+        showScreen('loginScreen', false);
+    }
+
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+        init();
+    } else {
+        window.onload = init;
+    }
+})();
+</script>
 </body>
 </html>
