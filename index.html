@@ -17,13 +17,13 @@
             background-color: #0a0a0a;
             color: #ffffff;
             font-family: Arial, sans-serif;
-            overflow: hidden; /* TV'de scroll çubuğu istenmez */
+            overflow: hidden; 
             width: 100vw;
             height: 100vh;
-            font-size: 22px; /* TV için büyük font */
+            font-size: 22px; 
         }
 
-        /* ODAK (FOCUS) GÖRÜNÜMÜ - TV Kumandası için kritik */
+        /* ODAK (FOCUS) GÖRÜNÜMÜ */
         .focused {
             background-color: #d32f2f !important;
             color: #ffffff !important;
@@ -45,9 +45,7 @@
         }
 
         /* --- GİRİŞ EKRANI TASARIMI --- */
-        #login-screen {
-            background-color: #111111;
-        }
+        #login-screen { background-color: #111111; }
         .login-box {
             width: 600px;
             margin: 100px auto 0 auto;
@@ -56,20 +54,9 @@
             border-radius: 10px;
             border: 2px solid #444;
         }
-        .login-box h1 {
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 36px;
-            color: #e50914;
-        }
-        .login-group {
-            margin-bottom: 20px;
-        }
-        .login-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #aaaaaa;
-        }
+        .login-box h1 { text-align: center; margin-bottom: 30px; font-size: 36px; color: #e50914; }
+        .login-group { margin-bottom: 20px; }
+        .login-group label { display: block; margin-bottom: 8px; color: #aaaaaa; }
         .login-input {
             width: 100%;
             padding: 15px;
@@ -89,35 +76,13 @@
             border-radius: 5px;
             margin-top: 20px;
         }
-        #login-error {
-            color: #ff4444;
-            text-align: center;
-            margin-top: 20px;
-            font-weight: bold;
-            display: none;
-        }
+        #login-error { color: #ff4444; text-align: center; margin-top: 20px; font-weight: bold; display: none; }
 
-        /* --- ANA UYGULAMA EKRANI TASARIMI (FLOAT İLE) --- */
-        .panel {
-            float: left;
-            height: 100%;
-            overflow: hidden;
-        }
-        #menu-panel {
-            width: 20%;
-            background-color: #141414;
-            border-right: 2px solid #333;
-        }
-        #category-panel {
-            width: 30%;
-            background-color: #1a1a1a;
-            border-right: 2px solid #333;
-        }
-        #content-panel {
-            width: 50%;
-            background-color: #0f0f0f;
-            position: relative;
-        }
+        /* --- ANA UYGULAMA EKRANI --- */
+        .panel { float: left; height: 100%; overflow: hidden; }
+        #menu-panel { width: 20%; background-color: #141414; border-right: 2px solid #333; }
+        #category-panel { width: 30%; background-color: #1a1a1a; border-right: 2px solid #333; }
+        #content-panel { width: 50%; background-color: #0f0f0f; position: relative; }
         .panel-header {
             padding: 20px;
             background-color: #000000;
@@ -126,11 +91,7 @@
             font-size: 26px;
             text-align: center;
         }
-        .list-container {
-            height: calc(100% - 70px);
-            overflow: hidden;
-            position: relative;
-        }
+        .list-container { height: calc(100% - 70px); overflow: hidden; position: relative; }
 
         /* LİSTE ÖĞELERİ */
         .menu-item, .category-item, .content-item {
@@ -144,7 +105,6 @@
         }
         .menu-item { text-align: center; font-size: 28px; padding: 40px 20px; }
         
-        /* Sayfalama Bilgisi */
         #pagination-info {
             position: absolute;
             bottom: 10px;
@@ -157,23 +117,22 @@
         }
 
         /* --- VİDEO OYNATICI TASARIMI --- */
-        #player-screen {
-            background-color: #000000;
-            z-index: 100;
-        }
-        #video-player {
-            width: 100%;
-            height: 100%;
-            background-color: #000;
-        }
+        #player-screen { background-color: #000000; z-index: 100; }
+        #video-player { width: 100%; height: 100%; background-color: #000; }
+        
+        /* Ekranda çıkan Play/Pause ve İleri Sarma bilgisi */
         #player-ui {
             position: absolute;
-            top: 20px;
-            left: 20px;
-            background-color: rgba(0,0,0,0.7);
-            padding: 15px;
+            top: 40px;
+            right: 40px;
+            background-color: rgba(229, 9, 20, 0.9); /* Kırmızımsı arka plan */
+            color: #fff;
+            padding: 15px 30px;
+            font-size: 28px;
+            font-weight: bold;
             border-radius: 8px;
             display: none;
+            z-index: 110;
         }
         #player-error-msg {
             position: absolute;
@@ -191,7 +150,6 @@
             z-index: 101;
         }
         
-        /* Loading Bildirimi */
         #loading-indicator {
             position: absolute;
             top: 50%;
@@ -216,7 +174,7 @@
         <div class="login-box">
             <h1>IPTV PLAYER</h1>
             <div class="login-group">
-                <label>Sunucu Adresi (Örn: http://domain.com:8080)</label>
+                <label>Sunucu Adresi</label>
                 <input type="text" id="input-url" class="login-input" placeholder="http://...">
             </div>
             <div class="login-group">
@@ -228,7 +186,7 @@
                 <input type="password" id="input-pass" class="login-input" placeholder="Şifre">
             </div>
             <button id="btn-login">Giriş Yap</button>
-            <div id="login-error">Giriş Başarısız! Bilgileri Kontrol Edin.</div>
+            <div id="login-error">Giriş Başarısız!</div>
         </div>
     </div>
 
@@ -244,73 +202,53 @@
 
         <div id="category-panel" class="panel">
             <div class="panel-header">KATEGORİLER</div>
-            <div class="list-container" id="category-list">
-                </div>
+            <div class="list-container" id="category-list"></div>
         </div>
 
         <div id="content-panel" class="panel">
             <div class="panel-header" id="content-header">İÇERİKLER</div>
-            <div class="list-container" id="content-list">
-                </div>
+            <div class="list-container" id="content-list"></div>
             <div id="pagination-info">Sayfa: 0/0</div>
         </div>
     </div>
 
     <div id="player-screen">
-        <div id="player-ui">Durduruldu / Oynatılıyor</div>
+        <div id="player-ui">Durum Bildirimi</div>
         <div id="player-error-msg">Yayın formatı TV tarafından desteklenmiyor veya Bağlantı Hatası.</div>
-        <video id="video-player" controls preload="auto"></video>
+        <video id="video-player" preload="auto"></video>
     </div>
 
     <script>
-        /* =========================================================================
-           BÖLÜM 1: KÜRESEL DEĞİŞKENLER VE DURUM (STATE) YÖNETİMİ
-           ========================================================================= */
-        
-        // CORS proxy ihtiyacı olursa buraya URL girilebilir. Örn: "https://cors-anywhere.herokuapp.com/"
+        /* --- BÖLÜM 1: DEĞİŞKENLER VE DURUM (STATE) --- */
         var PROXY_URL = ""; 
+        var xtreamConfig = { url: "", username: "", password: "" };
 
-        var xtreamConfig = {
-            url: "",
-            username: "",
-            password: ""
-        };
-
+        // "activeSection" odak yönetimi için anahtarımızdır. ("login", "menu", "categories", "content", "player")
         var appState = {
-            activeSection: "login", // login, menu, categories, content, player
-            currentMenuType: "live", // live, vod, series
-            
-            // Tüm çekilen verileri RAM'de ham obje olarak tutuyoruz (DOM'a basmıyoruz)
+            activeSection: "login", 
+            currentMenuType: "live", 
             allCategories: [],
             allContents: [],
-            
-            // Sayfalama (Pagination) Ayarları (ÇÖKME KORUMASI)
             pageLimit: 20, 
             currentPage: 0,
-            
-            // Seçili öğelerin index'leri
             loginIndex: 0,
             menuIndex: 0,
             categoryIndex: 0,
             contentIndex: 0,
-
             selectedCategoryId: null
         };
 
         var loginInputs = ["input-url", "input-user", "input-pass", "btn-login"];
         var menuItems = ["menu-live", "menu-vod", "menu-series"];
+        
+        var osdTimeout; // Player arayüz bildirimi için zamanlayıcı
 
-        /* =========================================================================
-           BÖLÜM 2: YARDIMCI FONKSİYONLAR (DOM, ODAK VE YÜKLEME)
-           ========================================================================= */
-
+        /* --- BÖLÜM 2: YARDIMCI FONKSİYONLAR --- */
         function showElement(id) { document.getElementById(id).style.display = "block"; }
         function hideElement(id) { document.getElementById(id).style.display = "none"; }
-        
         function showLoading() { showElement("loading-indicator"); }
         function hideLoading() { hideElement("loading-indicator"); }
 
-        // Odak (Focus) yönetimini CSS sınıfı ekleyip çıkararak yapıyoruz.
         function clearFocus() {
             var focusedItems = document.querySelectorAll(".focused");
             for (var i = 0; i < focusedItems.length; i++) {
@@ -323,7 +261,6 @@
             var el = document.getElementById(elementId);
             if (el) {
                 el.className += " focused";
-                // Eski cihazlarda scroll hizalamak için:
                 if(el.scrollIntoView) {
                     el.scrollIntoView({block: "center", behavior: "smooth"});
                 }
@@ -340,24 +277,19 @@
             else showElement("app-screen");
         }
 
-        function restoreLoginData() {
-            if (localStorage.getItem("xt_url")) {
-                document.getElementById("input-url").value = localStorage.getItem("xt_url");
-                document.getElementById("input-user").value = localStorage.getItem("xt_user");
-                document.getElementById("input-pass").value = localStorage.getItem("xt_pass");
-            }
+        // Ekran Üstü Bildirim (Play, Pause, +10s)
+        function showPlayerOSD(text) {
+            var osd = document.getElementById("player-ui");
+            osd.innerText = text;
+            osd.style.display = "block";
+            
+            clearTimeout(osdTimeout);
+            osdTimeout = setTimeout(function() {
+                osd.style.display = "none";
+            }, 3000);
         }
 
-        function saveLoginData() {
-            localStorage.setItem("xt_url", xtreamConfig.url);
-            localStorage.setItem("xt_user", xtreamConfig.username);
-            localStorage.setItem("xt_pass", xtreamConfig.password);
-        }
-
-        /* =========================================================================
-           BÖLÜM 3: XTREAM API İSTEKLERİ (ES5 XMLHttpRequest)
-           ========================================================================= */
-
+        /* --- BÖLÜM 3: API İSTEKLERİ --- */
         function apiRequest(action, extraParams, callback) {
             showLoading();
             var xhr = new XMLHttpRequest();
@@ -367,7 +299,7 @@
             if (extraParams) reqUrl += extraParams;
 
             xhr.open("GET", reqUrl, true);
-            xhr.timeout = 15000; // 15 saniye zaman aşımı
+            xhr.timeout = 15000;
             
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4) {
@@ -380,58 +312,44 @@
                             callback(false, "Geçersiz Yanıt Formatı");
                         }
                     } else {
-                        callback(false, "Bağlantı Hatası: " + xhr.status);
+                        callback(false, "Bağlantı Hatası");
                     }
                 }
             };
-            
-            xhr.ontimeout = function() {
-                hideLoading();
-                callback(false, "Bağlantı Zaman Aşımına Uğradı");
-            };
-
+            xhr.ontimeout = function() { hideLoading(); callback(false, "Zaman Aşımı"); };
             xhr.send();
         }
 
         function verifyLogin() {
-            xtreamConfig.url = document.getElementById("input-url").value.replace(/\/$/, ""); // Sonda slash varsa sil
+            xtreamConfig.url = document.getElementById("input-url").value.replace(/\/$/, "");
             xtreamConfig.username = document.getElementById("input-user").value;
             xtreamConfig.password = document.getElementById("input-pass").value;
 
-            if (xtreamConfig.url === "" || xtreamConfig.username === "") {
+            if (!xtreamConfig.url || !xtreamConfig.username) {
                 document.getElementById("login-error").innerText = "Lütfen alanları doldurun!";
-                showElement("login-error");
-                return;
+                showElement("login-error"); return;
             }
 
             apiRequest(null, null, function(success, data) {
                 if (success && data && data.user_info && data.user_info.auth === 1) {
                     hideElement("login-error");
-                    saveLoginData();
-                    
                     appState.activeSection = "menu";
                     appState.menuIndex = 0;
                     updateUIVisibility();
                     setFocus(menuItems[appState.menuIndex]);
-                    
-                    // Varsayılan olarak CANLI TV kategorilerini çek
                     loadCategories("get_live_categories");
                 } else {
-                    document.getElementById("login-error").innerText = "Giriş Başarısız! Yetkisiz Kullanıcı.";
+                    document.getElementById("login-error").innerText = "Giriş Başarısız!";
                     showElement("login-error");
                 }
             });
         }
 
-        /* =========================================================================
-           BÖLÜM 4: VERİ YÜKLEME VE RENDER (RAM KORUMALI)
-           ========================================================================= */
-
+        /* --- BÖLÜM 4: LİSTE OLUŞTURMA (PAGINATION) --- */
         function loadCategories(action) {
             document.getElementById("category-list").innerHTML = "";
             document.getElementById("content-list").innerHTML = "";
-            appState.allCategories = [];
-            appState.allContents = [];
+            appState.allCategories = []; appState.allContents = [];
             
             apiRequest(action, null, function(success, data) {
                 if (success && data && data.length > 0) {
@@ -444,7 +362,6 @@
         function renderCategories() {
             var container = document.getElementById("category-list");
             container.innerHTML = "";
-            
             for (var i = 0; i < appState.allCategories.length; i++) {
                 var div = document.createElement("div");
                 div.className = "category-item";
@@ -455,99 +372,64 @@
         }
 
         function loadContents(categoryId) {
-            var action = "";
-            if (appState.currentMenuType === "live") action = "get_live_streams";
-            else if (appState.currentMenuType === "vod") action = "get_vod_streams";
-            else if (appState.currentMenuType === "series") action = "get_series";
-
-            document.getElementById("content-list").innerHTML = "";
-            appState.allContents = [];
-            appState.currentPage = 0;
-            appState.contentIndex = 0;
+            var action = (appState.currentMenuType === "live") ? "get_live_streams" : (appState.currentMenuType === "vod") ? "get_vod_streams" : "get_series";
+            appState.allContents = []; appState.currentPage = 0; appState.contentIndex = 0;
 
             apiRequest(action, "&category_id=" + categoryId, function(success, data) {
                 if (success && data && data.length > 0) {
                     appState.allContents = data;
                     renderContentPage();
-                } else {
-                    var container = document.getElementById("content-list");
-                    container.innerHTML = "<div class='content-item'>İçerik bulunamadı.</div>";
-                    document.getElementById("pagination-info").innerText = "Sayfa: 0/0";
                 }
             });
         }
 
-        // BÖLÜM 4.1: SAYFALAMA MANTIĞI (PAGINATION) - TV ÇÖKMESİNİ ENGELLER
         function renderContentPage() {
             var container = document.getElementById("content-list");
-            container.innerHTML = ""; // DOM'u tamamen temizle (RAM boşalsın)
-
+            container.innerHTML = ""; 
             var startIndex = appState.currentPage * appState.pageLimit;
             var endIndex = startIndex + appState.pageLimit;
-            
-            // Eğer bitiş index'i toplam uzunluğu aşarsa sınırla
-            if (endIndex > appState.allContents.length) {
-                endIndex = appState.allContents.length;
-            }
+            if (endIndex > appState.allContents.length) endIndex = appState.allContents.length;
 
             for (var i = startIndex; i < endIndex; i++) {
                 var item = appState.allContents[i];
                 var div = document.createElement("div");
                 div.className = "content-item";
-                div.id = "content-" + (i - startIndex); // DOM indexi 0'dan başlar
+                div.id = "content-" + (i - startIndex);
                 div.innerText = item.name;
                 container.appendChild(div);
             }
 
             var totalPages = Math.ceil(appState.allContents.length / appState.pageLimit);
-            document.getElementById("pagination-info").innerText = "Sayfa: " + (appState.currentPage + 1) + " / " + totalPages + " (Toplam: " + appState.allContents.length + ")";
+            document.getElementById("pagination-info").innerText = "Sayfa: " + (appState.currentPage + 1) + " / " + totalPages;
             
-            // Eğer focus şu an içerik alanındaysa, ilk öğeyi odakla
-            if (appState.activeSection === "content") {
-                setFocus("content-" + appState.contentIndex);
-            }
+            if (appState.activeSection === "content") setFocus("content-" + appState.contentIndex);
         }
 
-        /* =========================================================================
-           BÖLÜM 5: VİDEO OYNATICI VE YAYIN BAĞLANTISI ÜRETME
-           ========================================================================= */
-
+        /* --- BÖLÜM 5: VİDEO YÖNETİMİ --- */
         function playSelectedContent() {
             var globalIndex = (appState.currentPage * appState.pageLimit) + appState.contentIndex;
             var selectedItem = appState.allContents[globalIndex];
-            
             if (!selectedItem) return;
 
             var streamUrl = "";
-            
-            // Akış URL'si oluşturma
             if (appState.currentMenuType === "live") {
-                // CANLI TV: /live/user/pass/streamID.ts
                 streamUrl = xtreamConfig.url + "/live/" + xtreamConfig.username + "/" + xtreamConfig.password + "/" + selectedItem.stream_id + ".ts";
-            } 
-            else if (appState.currentMenuType === "vod") {
-                // SİNEMA: /movie/user/pass/streamID.extension
+            } else if (appState.currentMenuType === "vod") {
                 var ext = selectedItem.container_extension ? selectedItem.container_extension : "mp4";
                 streamUrl = xtreamConfig.url + "/movie/" + xtreamConfig.username + "/" + xtreamConfig.password + "/" + selectedItem.stream_id + "." + ext;
-            }
-            else if (appState.currentMenuType === "series") {
-                // ES5 mimarisini basit ve kilitlenmeden uzak tutmak için serilerde ilk bölüm URL formunu deniyoruz
-                // Normalde Series için ayrı bir dizi info isteği atılır, fakat cihaz sınırları sebebiyle
-                // basit stream mantığı yürütülmüştür. (Eğer seri ise /series/... kullanılır)
+            } else {
                 var extSeries = selectedItem.container_extension ? selectedItem.container_extension : "mp4";
                 streamUrl = xtreamConfig.url + "/series/" + xtreamConfig.username + "/" + xtreamConfig.password + "/" + selectedItem.series_id + "." + extSeries;
             }
 
-            // PROXY varsa ekle
-            streamUrl = PROXY_URL + streamUrl;
-
+            // Durumu player olarak değiştir.
             appState.activeSection = "player";
             updateUIVisibility();
+            hideElement("player-error-msg");
+            showPlayerOSD("BAŞLATILIYOR...");
             
             var videoPlayer = document.getElementById("video-player");
-            hideElement("player-error-msg");
-            
-            videoPlayer.src = streamUrl;
+            videoPlayer.src = PROXY_URL + streamUrl;
             videoPlayer.load();
             videoPlayer.play();
         }
@@ -555,42 +437,33 @@
         function stopAndExitPlayer() {
             var videoPlayer = document.getElementById("video-player");
             videoPlayer.pause();
-            videoPlayer.removeAttribute('src'); // Kaynağı boşalt, hafızadan düşsün
+            videoPlayer.removeAttribute("src"); // ÇÖZÜM: Yayını tamamen keser ve belleği boşaltır.
             videoPlayer.load();
             
+            // Durumu tekrar listeye çevir ve odağı kanal sırasına oturt.
             appState.activeSection = "content";
             updateUIVisibility();
             setFocus("content-" + appState.contentIndex);
         }
 
-        // Hata yakalama mekanizması
         document.getElementById("video-player").onerror = function() {
             showElement("player-error-msg");
         };
 
-        /* =========================================================================
-           BÖLÜM 6: TV KUMANDASI / KLAVYE KONTROLLERİ (KEYDOWN EVENT)
-           ========================================================================= */
-
+        /* --- BÖLÜM 6: KLAVYE & KUMANDA DİNLEYİCİSİ (ODAK KORUMALI) --- */
         document.addEventListener("keydown", function(event) {
             var keyCode = event.keyCode || event.which;
 
-            // Ortak Tuş Kodları
-            var KEY_ENTER = 13;
-            var KEY_UP = 38;
-            var KEY_DOWN = 40;
-            var KEY_LEFT = 37;
-            var KEY_RIGHT = 39;
-            var KEY_BACK = 8;     // Backspace (Bilgisayar / Bazı TV'ler)
-            var KEY_ESC = 27;     // Escape
-            var KEY_RETURN = 461; // LG WebOS Return
-            var KEY_RETURN_TIZEN = 10009; // Samsung Tizen Return
+            var KEY_ENTER = 13, KEY_UP = 38, KEY_DOWN = 40, KEY_LEFT = 37, KEY_RIGHT = 39;
+            
+            // TV Geri Tuş Kodları (Esc, Backspace, LG webOS 461, Tizen 10009)
+            var KEY_BACK = 8, KEY_ESC = 27, KEY_RETURN_LG = 461, KEY_RETURN_TIZEN = 10009;
 
-            // GERİ DÖNÜŞ TUŞLARI YÖNETİMİ
-            if (keyCode === KEY_BACK || keyCode === KEY_ESC || keyCode === KEY_RETURN || keyCode === KEY_RETURN_TIZEN) {
+            // 6.1: Geri Dönüş ve Çıkış İşlemleri
+            if (keyCode === KEY_BACK || keyCode === KEY_ESC || keyCode === KEY_RETURN_LG || keyCode === KEY_RETURN_TIZEN) {
                 event.preventDefault();
                 if (appState.activeSection === "player") {
-                    stopAndExitPlayer();
+                    stopAndExitPlayer(); // Videoyu kes, listeye dön.
                 } else if (appState.activeSection === "content") {
                     appState.activeSection = "categories";
                     setFocus("cat-" + appState.categoryIndex);
@@ -601,144 +474,85 @@
                 return;
             }
 
-            // 6.1: GİRİŞ EKRANI NAVİGASYONU
-            if (appState.activeSection === "login") {
-                if (keyCode === KEY_DOWN) {
-                    if (appState.loginIndex < loginInputs.length - 1) appState.loginIndex++;
-                    setFocus(loginInputs[appState.loginIndex]);
-                } else if (keyCode === KEY_UP) {
-                    if (appState.loginIndex > 0) appState.loginIndex--;
-                    setFocus(loginInputs[appState.loginIndex]);
-                } else if (keyCode === KEY_ENTER) {
-                    if (appState.loginIndex === 3) { // Giriş Butonu
-                        verifyLogin();
-                    } else {
-                        // Input alanlarına girmek için kumandada OK tuşuna basınca standart davranış
-                        document.getElementById(loginInputs[appState.loginIndex]).focus();
-                    }
-                }
-            }
-            
-            // 6.2: ANA MENÜ NAVİGASYONU
-            else if (appState.activeSection === "menu") {
-                if (keyCode === KEY_DOWN) {
-                    if (appState.menuIndex < menuItems.length - 1) appState.menuIndex++;
-                    setFocus(menuItems[appState.menuIndex]);
-                } else if (keyCode === KEY_UP) {
-                    if (appState.menuIndex > 0) appState.menuIndex--;
-                    setFocus(menuItems[appState.menuIndex]);
-                } else if (keyCode === KEY_RIGHT) {
-                    if (appState.allCategories.length > 0) {
-                        appState.activeSection = "categories";
-                        setFocus("cat-" + appState.categoryIndex);
-                    }
-                } else if (keyCode === KEY_ENTER) {
-                    var selectedMenu = menuItems[appState.menuIndex];
-                    var action = "";
-                    if (selectedMenu === "menu-live") { appState.currentMenuType = "live"; action = "get_live_categories"; }
-                    else if (selectedMenu === "menu-vod") { appState.currentMenuType = "vod"; action = "get_vod_categories"; }
-                    else if (selectedMenu === "menu-series") { appState.currentMenuType = "series"; action = "get_series_categories"; }
-                    
-                    appState.categoryIndex = 0;
-                    loadCategories(action);
-                }
-            }
+            // 6.2: EĞER VİDEO EKRANINDAYSAK (Listeyi Kilitle, Sadece Videoyu Kontrol Et)
+            if (appState.activeSection === "player") {
+                event.preventDefault();
+                var videoPlayer = document.getElementById("video-player");
 
-            // 6.3: KATEGORİ NAVİGASYONU
-            else if (appState.activeSection === "categories") {
-                if (keyCode === KEY_DOWN) {
-                    if (appState.categoryIndex < appState.allCategories.length - 1) {
-                        appState.categoryIndex++;
-                        setFocus("cat-" + appState.categoryIndex);
-                    }
-                } else if (keyCode === KEY_UP) {
-                    if (appState.categoryIndex > 0) {
-                        appState.categoryIndex--;
-                        setFocus("cat-" + appState.categoryIndex);
-                    }
-                } else if (keyCode === KEY_LEFT) {
-                    appState.activeSection = "menu";
-                    setFocus(menuItems[appState.menuIndex]);
-                } else if (keyCode === KEY_RIGHT) {
-                    if (appState.allContents.length > 0) {
-                        appState.activeSection = "content";
-                        appState.contentIndex = 0;
-                        setFocus("content-0");
-                    }
-                } else if (keyCode === KEY_ENTER) {
-                    var selectedCatId = appState.allCategories[appState.categoryIndex].category_id;
-                    appState.selectedCategoryId = selectedCatId;
-                    loadContents(selectedCatId);
-                    // İçerik yüklendikten sonra sağ panele geçiş yap
-                    setTimeout(function(){
-                        if(appState.allContents.length > 0) {
-                            appState.activeSection = "content";
-                            setFocus("content-0");
-                        }
-                    }, 500); // Eski API'lerin yanıt süresi hesaba katılarak ufak bir gecikme
-                }
-            }
-
-            // 6.4: İÇERİK (KANAL/FİLM) NAVİGASYONU & SAYFALAMA KONTROLÜ
-            else if (appState.activeSection === "content") {
-                var currentDOMItemsCount = document.getElementById("content-list").children.length;
-
-                if (keyCode === KEY_DOWN) {
-                    if (appState.contentIndex < currentDOMItemsCount - 1) {
-                        appState.contentIndex++;
-                        setFocus("content-" + appState.contentIndex);
-                    } else {
-                        // Sayfa Sonuna Gelindi, Sonraki Sayfayı Yükle
-                        var totalPages = Math.ceil(appState.allContents.length / appState.pageLimit);
-                        if (appState.currentPage < totalPages - 1) {
-                            appState.currentPage++;
-                            appState.contentIndex = 0;
-                            renderContentPage();
-                        }
-                    }
-                } else if (keyCode === KEY_UP) {
-                    if (appState.contentIndex > 0) {
-                        appState.contentIndex--;
-                        setFocus("content-" + appState.contentIndex);
-                    } else {
-                        // Sayfa Başına Gelindi, Önceki Sayfayı Yükle
-                        if (appState.currentPage > 0) {
-                            appState.currentPage--;
-                            appState.contentIndex = appState.pageLimit - 1; // Bir önceki sayfanın en altı
-                            renderContentPage();
-                        }
-                    }
-                } else if (keyCode === KEY_LEFT) {
-                    appState.activeSection = "categories";
-                    setFocus("cat-" + appState.categoryIndex);
-                } else if (keyCode === KEY_ENTER) {
-                    playSelectedContent();
-                }
-            }
-            
-            // 6.5: VİDEO EKRANI KONTROLLERİ (PLAY/PAUSE)
-            else if (appState.activeSection === "player") {
                 if (keyCode === KEY_ENTER) {
-                    var videoPlayer = document.getElementById("video-player");
                     if (videoPlayer.paused) {
                         videoPlayer.play();
+                        showPlayerOSD("▶ OYNATILIYOR");
                     } else {
                         videoPlayer.pause();
+                        showPlayerOSD("⏸ DURDURULDU");
                     }
+                } 
+                else if (keyCode === KEY_LEFT) {
+                    // Sola basılınca 10 sn geri sar
+                    videoPlayer.currentTime = Math.max(0, videoPlayer.currentTime - 10);
+                    showPlayerOSD("⏪ -10 Saniye");
+                } 
+                else if (keyCode === KEY_RIGHT) {
+                    // Sağa basılınca 10 sn ileri sar
+                    videoPlayer.currentTime = videoPlayer.currentTime + 10;
+                    showPlayerOSD("⏩ +10 Saniye");
                 }
+                return; // Player içindeysek listenin aşağı/yukarı kaymasını KESİN OLARAK engeller.
+            }
+
+            // --- AŞAĞIDAKİ KODLAR SADECE "appState.activeSection" PLAYER DEĞİLSE ÇALIŞIR ---
+
+            if (appState.activeSection === "login") {
+                if (keyCode === KEY_DOWN) { if (appState.loginIndex < loginInputs.length - 1) appState.loginIndex++; setFocus(loginInputs[appState.loginIndex]); }
+                else if (keyCode === KEY_UP) { if (appState.loginIndex > 0) appState.loginIndex--; setFocus(loginInputs[appState.loginIndex]); }
+                else if (keyCode === KEY_ENTER) { if (appState.loginIndex === 3) verifyLogin(); else document.getElementById(loginInputs[appState.loginIndex]).focus(); }
+            }
+            else if (appState.activeSection === "menu") {
+                if (keyCode === KEY_DOWN) { if (appState.menuIndex < menuItems.length - 1) appState.menuIndex++; setFocus(menuItems[appState.menuIndex]); }
+                else if (keyCode === KEY_UP) { if (appState.menuIndex > 0) appState.menuIndex--; setFocus(menuItems[appState.menuIndex]); }
+                else if (keyCode === KEY_RIGHT) { if (appState.allCategories.length > 0) { appState.activeSection = "categories"; setFocus("cat-" + appState.categoryIndex); } }
+                else if (keyCode === KEY_ENTER) {
+                    var selectedMenu = menuItems[appState.menuIndex];
+                    var action = (selectedMenu === "menu-live") ? "get_live_categories" : (selectedMenu === "menu-vod") ? "get_vod_categories" : "get_series_categories";
+                    appState.currentMenuType = selectedMenu.replace("menu-", "");
+                    appState.categoryIndex = 0; loadCategories(action);
+                }
+            }
+            else if (appState.activeSection === "categories") {
+                if (keyCode === KEY_DOWN) { if (appState.categoryIndex < appState.allCategories.length - 1) { appState.categoryIndex++; setFocus("cat-" + appState.categoryIndex); } }
+                else if (keyCode === KEY_UP) { if (appState.categoryIndex > 0) { appState.categoryIndex--; setFocus("cat-" + appState.categoryIndex); } }
+                else if (keyCode === KEY_LEFT) { appState.activeSection = "menu"; setFocus(menuItems[appState.menuIndex]); }
+                else if (keyCode === KEY_RIGHT) { if (appState.allContents.length > 0) { appState.activeSection = "content"; appState.contentIndex = 0; setFocus("content-0"); } }
+                else if (keyCode === KEY_ENTER) {
+                    appState.selectedCategoryId = appState.allCategories[appState.categoryIndex].category_id;
+                    loadContents(appState.selectedCategoryId);
+                    setTimeout(function(){ if(appState.allContents.length > 0) { appState.activeSection = "content"; setFocus("content-0"); } }, 500);
+                }
+            }
+            else if (appState.activeSection === "content") {
+                var currentDOMCount = document.getElementById("content-list").children.length;
+                if (keyCode === KEY_DOWN) {
+                    if (appState.contentIndex < currentDOMCount - 1) { appState.contentIndex++; setFocus("content-" + appState.contentIndex); }
+                    else {
+                        var totalPages = Math.ceil(appState.allContents.length / appState.pageLimit);
+                        if (appState.currentPage < totalPages - 1) { appState.currentPage++; appState.contentIndex = 0; renderContentPage(); }
+                    }
+                } 
+                else if (keyCode === KEY_UP) {
+                    if (appState.contentIndex > 0) { appState.contentIndex--; setFocus("content-" + appState.contentIndex); }
+                    else { if (appState.currentPage > 0) { appState.currentPage--; appState.contentIndex = appState.pageLimit - 1; renderContentPage(); } }
+                } 
+                else if (keyCode === KEY_LEFT) { appState.activeSection = "categories"; setFocus("cat-" + appState.categoryIndex); }
+                else if (keyCode === KEY_ENTER) { playSelectedContent(); }
             }
         });
 
-        /* =========================================================================
-           BÖLÜM 7: BAŞLANGIÇ (INIT) FONKSİYONU
-           ========================================================================= */
-
         window.onload = function() {
-            restoreLoginData();
             updateUIVisibility();
-            setFocus(loginInputs[appState.loginIndex]); // İlk açılışta URL inputuna focus
+            setFocus(loginInputs[appState.loginIndex]);
         };
-
     </script>
 </body>
 </html>
+
