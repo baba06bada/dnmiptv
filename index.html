@@ -25,14 +25,17 @@
         }
         .screen.active { display: flex; }
 
-        /* ========== FOCUS STILLERI (KUMANDA ICIN) ========== */
+        /* ========== FOCUS STILLERI (KUMANDA) ========== */
         button:focus,
         .cat-item:focus,
         .stream-item:focus,
         .episode-item:focus,
         .season-box:focus,
         .saved-panel-item:focus,
-        input:focus {
+        .fav-item:focus,
+        input:focus,
+        .fav-star:focus,
+        .search-input:focus {
             outline: none !important;
             border: 4px solid #ff0 !important;
             box-shadow: 0 0 18px 6px rgba(255,255,0,0.8) !important;
@@ -44,11 +47,7 @@
             border: 5px solid #ff0 !important;
             box-shadow: 0 0 25px 10px rgba(255,255,0,0.9) !important;
         }
-        .ctrl-btn:focus {
-            outline: none !important;
-            border: 4px solid #ff0 !important;
-            box-shadow: 0 0 15px 5px rgba(255,255,0,0.8) !important;
-        }
+        .ctrl-btn:focus,
         .back-btn:focus,
         .home-btn:focus,
         .back-btn-text:focus {
@@ -90,11 +89,11 @@
         .saved-panel-item:hover { background: #333; }
 
         /* ========== ANA MENU ========== */
-        #mainMenuScreen.active { flex-direction: row; justify-content: center; align-items: center; position: relative; }
+        #mainMenuScreen.active { flex-direction: row; flex-wrap: wrap; justify-content: center; align-items: center; position: relative; }
         .menu-btn {
             background: #2a2a2a; border: 3px solid #555; color: #fff;
-            font-size: 42px; padding: 50px 40px; margin: 0 20px; cursor: pointer;
-            border-radius: 10px; min-width: 240px; text-align: center; transition: background 0.2s;
+            font-size: 36px; padding: 45px 35px; margin: 15px; cursor: pointer;
+            border-radius: 10px; min-width: 220px; text-align: center; transition: background 0.2s;
         }
         .menu-btn:hover { background: #3a3a3a; border-color: #f0c040; }
         .panel-switch-btn {
@@ -120,20 +119,35 @@
         .content-header {
             padding: 20px 18px; background: #181818; border-bottom: 2px solid #333;
             font-size: 30px; font-weight: bold; color: #f0c040; display: flex;
-            align-items: center; justify-content: space-between;
+            align-items: center; justify-content: space-between; flex-wrap: wrap;
         }
         .home-btn {
             background: #2a2a2a; border: 3px solid #f0c040; color: #f0c040;
             padding: 12px 22px; font-size: 24px; cursor: pointer; border-radius: 6px;
         }
+        .search-row {
+            display: flex; align-items: center; padding: 15px 18px; background: #181818;
+            border-bottom: 2px solid #333;
+        }
+        .search-input {
+            flex: 1; padding: 14px 18px; font-size: 26px;
+            background: #2a2a2a; border: 2px solid #444; color: #fff; border-radius: 6px; outline: none;
+        }
+        .search-input::placeholder { color: #888; }
         .content-list { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; }
-        .stream-item, .episode-item {
+        .stream-item, .episode-item, .fav-item {
             padding: 22px 14px; border-bottom: 2px solid #2a2a2a; cursor: pointer; font-size: 27px;
             display: flex; align-items: center;
         }
-        .stream-item:hover, .episode-item:hover { background: #222; }
+        .stream-item:hover, .episode-item:hover, .fav-item:hover { background: #222; }
         .stream-item .num { width: 60px; text-align: center; color: #888; margin-right: 14px; }
-        .stream-item .name { flex: 1; }
+        .stream-item .name, .fav-item .name { flex: 1; }
+        .fav-star {
+            background: transparent; border: 2px solid #888; color: #888;
+            font-size: 28px; padding: 6px 12px; cursor: pointer; border-radius: 6px;
+            margin-left: 10px; min-width: 55px; text-align: center;
+        }
+        .fav-star.active { color: #f0c040; border-color: #f0c040; }
         .pagination {
             display: flex; justify-content: center; align-items: center;
             padding: 20px; background: #181818; border-top: 2px solid #333;
@@ -144,6 +158,15 @@
         }
         .pagination button:disabled { opacity: 0.3; cursor: default; }
         .pagination .page-info { font-size: 24px; min-width: 140px; text-align: center; }
+
+        /* ========== FAVORI EKRANI ========== */
+        #favScreen.active { flex-direction: column; align-items: stretch; }
+        .fav-header {
+            padding: 20px 18px; background: #181818; border-bottom: 2px solid #333;
+            font-size: 30px; font-weight: bold; color: #f0c040; display: flex;
+            align-items: center; justify-content: space-between;
+        }
+        .fav-list { flex: 1; overflow-y: auto; padding: 12px; }
 
         /* ========== SEZON EKRANI ========== */
         #seasonsScreen.active { flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 24px; }
@@ -235,6 +258,7 @@
         <button class="menu-btn" data-target="live" tabindex="0">📺 CANLI TV</button>
         <button class="menu-btn" data-target="vod" tabindex="0">🎬 SİNEMA (VOD)</button>
         <button class="menu-btn" data-target="series" tabindex="0">📚 DİZİLER</button>
+        <button class="menu-btn" id="favMenuBtn" tabindex="0">⭐ FAVORİLERİM</button>
     </div>
 
     <!-- ==================== LISTE EKRANI ==================== -->
@@ -245,9 +269,21 @@
                 <span id="contentHeader">Kategoriler</span>
                 <button class="home-btn" id="listHomeBtn" tabindex="0">🏠 ANA MENÜYE DÖN</button>
             </div>
+            <div class="search-row">
+                <input type="text" class="search-input" id="searchInput" placeholder="🔍 Kanal/Film Ara..." tabindex="0">
+            </div>
             <div class="content-list" id="contentList"></div>
             <div class="pagination" id="pagination"></div>
         </div>
+    </div>
+
+    <!-- ==================== FAVORI EKRANI ==================== -->
+    <div id="favScreen" class="screen">
+        <div class="fav-header">
+            <span>⭐ Favorilerim</span>
+            <button class="home-btn" id="favHomeBtn" tabindex="0">🏠 ANA MENÜYE DÖN</button>
+        </div>
+        <div class="fav-list" id="favList"></div>
     </div>
 
     <!-- ==================== SEZON EKRANI ==================== -->
@@ -303,11 +339,13 @@
     var PASSWORD = "";
     var XTREAM_URL = "";
 
-    var currentScreen = "login"; // login, main_menu, list, seasons, episodes, player
-    var currentListType = "";    // live, vod, series
+    var currentScreen = "login";
+    var currentListType = "";
     var currentCategoryId = "";
     var currentCategoryName = "";
     var streamList = [];
+    var filteredStreamList = []; // arama sonuclari
+    var isSearchActive = false;
     var currentPage = 1;
     var itemsPerPage = 30;
     var totalPages = 1;
@@ -322,8 +360,12 @@
     // Player degiskenleri
     var hideControlsTimeout = null;
     var videoElement = null;
-    var targetPlaybackRate = 1.0; // hedef hiz (video hazir olunca uygulanacak)
-    var playbackRateReady = false; // video hazir mi?
+    var targetPlaybackRate = 1.0;
+    var playbackRateReady = false;
+    var speedApplyTimer = null; // hiz uygulamak icin timeout
+
+    // Favoriler
+    var favorites = []; // { type: 'live'|'vod'|'series', item: {...} }
 
     // ==================== YARDIMCI FONKSIYONLAR ====================
     function getEl(id) { return document.getElementById(id); }
@@ -353,7 +395,6 @@
         }
         currentScreen = screen;
         showScreen(screenId);
-        // Ekran degistiginde ilk odaklanabilir elemana odaklan
         setTimeout(autoFocusFirst, 150);
     }
 
@@ -364,6 +405,7 @@
                 videoElement.src = '';
                 videoElement.load();
             }
+            if (speedApplyTimer) clearTimeout(speedApplyTimer);
         }
         if (historyStack.length > 0) {
             var prev = historyStack.pop();
@@ -373,11 +415,16 @@
                 'list': 'listScreen',
                 'seasons': 'seasonsScreen',
                 'episodes': 'episodesScreen',
-                'player': 'playerScreen'
+                'player': 'playerScreen',
+                'fav': 'favScreen'
             };
             var targetId = screenMap[prev] || 'mainMenuScreen';
             currentScreen = prev;
             showScreen(targetId);
+            // Eger liste ekranina donuyorsak ve arama aktipse, inputu temizleyip tam listeyi geri yukle
+            if (prev === 'list' && isSearchActive) {
+                clearSearch();
+            }
             setTimeout(autoFocusFirst, 150);
         } else {
             currentScreen = 'main_menu';
@@ -391,12 +438,11 @@
         if (!container) container = document;
         var els = container.querySelectorAll(
             'button, .cat-item, .stream-item, .episode-item, .season-box, .saved-panel-item, ' +
-            'input:not([type="hidden"]), .progress-bar, .menu-btn, .ctrl-btn, .back-btn, .home-btn, .back-btn-text'
+            '.fav-item, .fav-star, input:not([type="hidden"]), .progress-bar, .menu-btn, .ctrl-btn, .back-btn, .home-btn, .back-btn-text'
         );
         var result = [];
         for (var i = 0; i < els.length; i++) {
             var el = els[i];
-            // Sadece görünür ekrandaki ve aktif ekrandaki elementler
             if (el.offsetParent !== null && el.tabIndex >= 0) {
                 result.push(el);
             }
@@ -423,7 +469,6 @@
             }
         }
         if (currentIndex === -1) {
-            // Odaklanmis eleman yoksa ilk elemani odakla
             focusable[0].focus();
             return;
         }
@@ -465,10 +510,7 @@
     function loadSavedPanels() {
         var panelsStr = localStorage.getItem('iptv_panels');
         if (!panelsStr) return [];
-        try {
-            var panels = JSON.parse(panelsStr);
-            return panels || [];
-        } catch(e) { return []; }
+        try { return JSON.parse(panelsStr) || []; } catch(e) { return []; }
     }
 
     function savePanel(panelName, server, user, pass) {
@@ -483,9 +525,7 @@
                 break;
             }
         }
-        if (!found) {
-            panels.push({ name: panelName, server: server, username: user, password: pass });
-        }
+        if (!found) panels.push({ name: panelName, server: server, username: user, password: pass });
         localStorage.setItem('iptv_panels', JSON.stringify(panels));
         renderSavedPanels();
     }
@@ -515,17 +555,63 @@
                     getEl('passwordInput').value = panel.password;
                     doLogin();
                 };
-                div.onkeydown = function(e) {
-                    if (e.keyCode === 13) {
-                        getEl('panelNameInput').value = panel.name;
-                        getEl('serverInput').value = panel.server;
-                        getEl('usernameInput').value = panel.username;
-                        getEl('passwordInput').value = panel.password;
-                        doLogin();
-                    }
-                };
+                div.onkeydown = function(e) { if (e.keyCode === 13) { div.onclick(); } };
                 container.appendChild(div);
             })(panels[i]);
+        }
+    }
+
+    // ==================== FAVORI YONETIMI ====================
+    function loadFavorites() {
+        var favStr = localStorage.getItem('iptv_favorites');
+        if (!favStr) { favorites = []; return; }
+        try { favorites = JSON.parse(favStr) || []; } catch(e) { favorites = []; }
+    }
+
+    function saveFavorites() {
+        localStorage.setItem('iptv_favorites', JSON.stringify(favorites));
+    }
+
+    function isFavorite(type, item) {
+        var id = item.stream_id || item.series_id || item.id || '';
+        for (var i = 0; i < favorites.length; i++) {
+            var f = favorites[i];
+            var fid = f.item.stream_id || f.item.series_id || f.item.id || '';
+            if (f.type === type && fid === id) return true;
+        }
+        return false;
+    }
+
+    function toggleFavorite(type, item, starElement) {
+        var id = item.stream_id || item.series_id || item.id || '';
+        var foundIndex = -1;
+        for (var i = 0; i < favorites.length; i++) {
+            var f = favorites[i];
+            var fid = f.item.stream_id || f.item.series_id || f.item.id || '';
+            if (f.type === type && fid === id) {
+                foundIndex = i;
+                break;
+            }
+        }
+        if (foundIndex >= 0) {
+            favorites.splice(foundIndex, 1);
+            if (starElement) starElement.classList.remove('active');
+            if (starElement) starElement.textContent = '☆';
+        } else {
+            favorites.push({ type: type, item: item });
+            if (starElement) starElement.classList.add('active');
+            if (starElement) starElement.textContent = '★';
+        }
+        saveFavorites();
+    }
+
+    function updateStarUI(type, item, starElement) {
+        if (isFavorite(type, item)) {
+            starElement.classList.add('active');
+            starElement.textContent = '★';
+        } else {
+            starElement.classList.remove('active');
+            starElement.textContent = '☆';
         }
     }
 
@@ -552,6 +638,7 @@
             if (data.user_info && data.user_info.auth === 1) {
                 savePanel(panelName, server, user, pass);
                 errorEl.textContent = '';
+                loadFavorites();
                 historyStack = [];
                 navigateTo('main_menu', 'mainMenuScreen', false);
             } else {
@@ -563,7 +650,6 @@
     }
 
     function logoutToLogin() {
-        // Oturumu kapat, login ekranina don
         historyStack = [];
         currentScreen = 'login';
         showScreen('loginScreen');
@@ -573,10 +659,18 @@
 
     // ==================== MENU ISLEMLERI ====================
     function onMainMenuClick(target) {
+        if (target === 'fav') {
+            showFavoritesScreen();
+            return;
+        }
         currentListType = target;
         currentCategoryId = '';
         currentPage = 1;
         streamList = [];
+        filteredStreamList = [];
+        isSearchActive = false;
+        var searchInput = getEl('searchInput');
+        if (searchInput) searchInput.value = '';
         historyStack = ['main_menu'];
         if (target === 'live') {
             loadCategories('get_live_categories', 'Canli TV Kategorileri');
@@ -608,9 +702,7 @@
                     return function() { selectCategory(id, name); };
                 })(cat.category_id, cat.category_name);
                 div.onkeydown = (function(id, name) {
-                    return function(e) {
-                        if (e.keyCode === 13) { selectCategory(id, name); }
-                    };
+                    return function(e) { if (e.keyCode === 13) { selectCategory(id, name); } };
                 })(cat.category_id, cat.category_name);
                 sidebar.appendChild(div);
             }
@@ -625,6 +717,9 @@
         currentCategoryId = catId;
         currentCategoryName = catName;
         currentPage = 1;
+        isSearchActive = false;
+        var searchInput = getEl('searchInput');
+        if (searchInput) searchInput.value = '';
         var items = document.querySelectorAll('#categorySidebar .cat-item');
         for (var i = 0; i < items.length; i++) {
             items[i].classList.remove('active');
@@ -645,19 +740,56 @@
         getEl('pagination').innerHTML = '';
         ajaxGet(url, function(data) {
             streamList = data || [];
-            totalPages = Math.ceil(streamList.length / itemsPerPage) || 1;
+            filteredStreamList = streamList.slice();
+            totalPages = Math.ceil(filteredStreamList.length / itemsPerPage) || 1;
             currentPage = 1;
+            isSearchActive = false;
+            var searchInput = getEl('searchInput');
+            if (searchInput) searchInput.value = '';
             renderPage();
             setTimeout(autoFocusFirst, 100);
         });
     }
 
+    // Arama fonksiyonu (ES5 for dongusuyle)
+    function performSearch(searchText) {
+        if (!searchText || searchText.trim() === '') {
+            filteredStreamList = streamList.slice();
+            isSearchActive = false;
+        } else {
+            var query = searchText.toLowerCase();
+            var results = [];
+            for (var i = 0; i < streamList.length; i++) {
+                var name = (streamList[i].name || streamList[i].title || '').toLowerCase();
+                if (name.indexOf(query) !== -1) {
+                    results.push(streamList[i]);
+                }
+            }
+            filteredStreamList = results;
+            isSearchActive = true;
+        }
+        currentPage = 1;
+        totalPages = Math.ceil(filteredStreamList.length / itemsPerPage) || 1;
+        renderPage();
+    }
+
+    function clearSearch() {
+        filteredStreamList = streamList.slice();
+        isSearchActive = false;
+        var searchInput = getEl('searchInput');
+        if (searchInput) searchInput.value = '';
+        currentPage = 1;
+        totalPages = Math.ceil(filteredStreamList.length / itemsPerPage) || 1;
+        renderPage();
+    }
+
     function renderPage() {
         var listEl = getEl('contentList');
         listEl.innerHTML = '';
+        var displayList = filteredStreamList;
         var start = (currentPage - 1) * itemsPerPage;
-        var end = Math.min(start + itemsPerPage, streamList.length);
-        var slice = streamList.slice(start, end);
+        var end = Math.min(start + itemsPerPage, displayList.length);
+        var slice = displayList.slice(start, end);
         for (var i = 0; i < slice.length; i++) {
             var item = slice[i];
             var div = document.createElement('div');
@@ -671,16 +803,37 @@
             nameSpan.textContent = item.name || item.title || 'Isimsiz';
             div.appendChild(numSpan);
             div.appendChild(nameSpan);
+
+            // Favori yildizi
+            var starBtn = document.createElement('button');
+            starBtn.className = 'fav-star';
+            starBtn.setAttribute('tabindex', '0');
+            updateStarUI(currentListType, item, starBtn);
+            starBtn.onclick = (function(it, star) {
+                return function(e) {
+                    e.stopPropagation();
+                    toggleFavorite(currentListType, it, star);
+                };
+            })(item, starBtn);
+            starBtn.onkeydown = (function(it, star) {
+                return function(e) {
+                    if (e.keyCode === 13) {
+                        e.stopPropagation();
+                        toggleFavorite(currentListType, it, star);
+                    }
+                };
+            })(item, starBtn);
+            div.appendChild(starBtn);
+
             div.onclick = (function(it) {
                 return function() { onStreamClick(it); };
             })(item);
             div.onkeydown = (function(it) {
-                return function(e) {
-                    if (e.keyCode === 13) { onStreamClick(it); }
-                };
+                return function(e) { if (e.keyCode === 13) { onStreamClick(it); } };
             })(item);
             listEl.appendChild(div);
         }
+
         var pag = getEl('pagination');
         pag.innerHTML = '';
         var prevBtn = document.createElement('button');
@@ -720,7 +873,75 @@
         }
     }
 
-    // ==================== DIZI ISLEMLERI (SADECE ES5 for...in) ====================
+    // ==================== FAVORI EKRANI ====================
+    function showFavoritesScreen() {
+        navigateTo('fav', 'favScreen');
+        renderFavoritesList();
+    }
+
+    function renderFavoritesList() {
+        var container = getEl('favList');
+        container.innerHTML = '';
+        if (favorites.length === 0) {
+            var emptyDiv = document.createElement('div');
+            emptyDiv.style.cssText = 'padding:30px;text-align:center;font-size:30px;color:#888;';
+            emptyDiv.textContent = 'Henuz favori eklenmemis.';
+            container.appendChild(emptyDiv);
+            return;
+        }
+        for (var i = 0; i < favorites.length; i++) {
+            var f = favorites[i];
+            var item = f.item;
+            var type = f.type;
+            var div = document.createElement('div');
+            div.className = 'fav-item';
+            div.setAttribute('tabindex', '0');
+            var typeLabel = type === 'live' ? '[TV]' : (type === 'vod' ? '[Film]' : '[Dizi]');
+            var nameSpan = document.createElement('span');
+            nameSpan.className = 'name';
+            nameSpan.textContent = typeLabel + ' ' + (item.name || item.title || 'Isimsiz');
+            div.appendChild(nameSpan);
+
+            var removeBtn = document.createElement('button');
+            removeBtn.className = 'fav-star active';
+            removeBtn.textContent = '★';
+            removeBtn.setAttribute('tabindex', '0');
+            removeBtn.onclick = (function(favType, favItem, btn) {
+                return function(e) {
+                    e.stopPropagation();
+                    toggleFavorite(favType, favItem, btn);
+                    renderFavoritesList();
+                };
+            })(type, item, removeBtn);
+            div.appendChild(removeBtn);
+
+            div.onclick = (function(favType, favItem) {
+                return function() {
+                    if (favType === 'series') {
+                        currentListType = 'series';
+                        currentSeriesId = favItem.series_id;
+                        loadSeriesSeasons(currentSeriesId);
+                    } else {
+                        currentListType = favType;
+                        var streamUrl = '';
+                        if (favType === 'live') {
+                            streamUrl = favItem.stream_url || (XTREAM_URL + '/live/' + USERNAME + '/' + PASSWORD + '/' + favItem.stream_id + '.ts');
+                        } else if (favType === 'vod') {
+                            streamUrl = favItem.stream_url || (XTREAM_URL + '/movie/' + USERNAME + '/' + PASSWORD + '/' + favItem.stream_id + '.' + (favItem.container_extension || 'mp4'));
+                        }
+                        openPlayer(streamUrl, favItem.name || favItem.title);
+                    }
+                };
+            })(type, item);
+            div.onkeydown = (function(favType, favItem) {
+                return function(e) { if (e.keyCode === 13) { div.onclick(); } };
+            })(type, item);
+            container.appendChild(div);
+        }
+        setTimeout(autoFocusFirst, 100);
+    }
+
+    // ==================== DIZI ISLEMLERI ====================
     function loadSeriesSeasons(seriesId) {
         var url = API_BASE_URL + '&action=get_series_info&series_id=' + seriesId;
         getEl('seasonsHeader').textContent = 'Yukleniyor...';
@@ -743,9 +964,7 @@
             var episodesObj = data.episodes || {};
             var seasonNums = [];
             for (var sn in episodesObj) {
-                if (episodesObj.hasOwnProperty(sn)) {
-                    seasonNums.push(sn);
-                }
+                if (episodesObj.hasOwnProperty(sn)) seasonNums.push(sn);
             }
             seasonNums.sort(function(a,b){ return parseInt(a)-parseInt(b); });
             for (var i = 0; i < seasonNums.length; i++) {
@@ -754,14 +973,8 @@
                 div.className = 'season-box';
                 div.setAttribute('tabindex', '0');
                 div.textContent = 'Sezon ' + snum;
-                div.onclick = (function(seasonNum) {
-                    return function() { onSeasonClick(seasonNum); };
-                })(snum);
-                div.onkeydown = (function(seasonNum) {
-                    return function(e) {
-                        if (e.keyCode === 13) { onSeasonClick(seasonNum); }
-                    };
-                })(snum);
+                div.onclick = (function(sn){ return function(){ onSeasonClick(sn); }; })(snum);
+                div.onkeydown = (function(sn){ return function(e){ if(e.keyCode===13) onSeasonClick(sn); }; })(snum);
                 grid.appendChild(div);
             }
         } else {
@@ -772,14 +985,8 @@
                 div.className = 'season-box';
                 div.setAttribute('tabindex', '0');
                 div.textContent = season.name || ('Sezon ' + snum);
-                div.onclick = (function(seasonNum) {
-                    return function() { onSeasonClick(seasonNum); };
-                })(snum);
-                div.onkeydown = (function(seasonNum) {
-                    return function(e) {
-                        if (e.keyCode === 13) { onSeasonClick(seasonNum); }
-                    };
-                })(snum);
+                div.onclick = (function(sn){ return function(){ onSeasonClick(sn); }; })(snum);
+                div.onkeydown = (function(sn){ return function(e){ if(e.keyCode===13) onSeasonClick(sn); }; })(snum);
                 grid.appendChild(div);
             }
         }
@@ -821,14 +1028,8 @@
             div.className = 'episode-item';
             div.setAttribute('tabindex', '0');
             div.textContent = (ep.title || ('Bolum ' + ep.episode_num));
-            div.onclick = (function(epCopy) {
-                return function() { playEpisode(epCopy); };
-            })(ep);
-            div.onkeydown = (function(epCopy) {
-                return function(e) {
-                    if (e.keyCode === 13) { playEpisode(epCopy); }
-                };
-            })(ep);
+            div.onclick = (function(epCopy) { return function() { playEpisode(epCopy); }; })(ep);
+            div.onkeydown = (function(epCopy) { return function(e) { if(e.keyCode===13) playEpisode(epCopy); }; })(ep);
             container.appendChild(div);
         }
         setTimeout(autoFocusFirst, 100);
@@ -840,11 +1041,11 @@
         openPlayer(streamUrl, ep.title || 'Bolum');
     }
 
-    // ==================== PLAYER ISLEMLERI ====================
+    // ==================== PLAYER ISLEMLERI (KARARLI HIZ) ====================
     function openPlayer(url, title) {
-        // Hiz ayarini sifirla
         targetPlaybackRate = 1.0;
         playbackRateReady = false;
+        if (speedApplyTimer) clearTimeout(speedApplyTimer);
 
         navigateTo('player', 'playerScreen');
         videoElement = getEl('videoPlayer');
@@ -862,15 +1063,20 @@
         updatePlayPauseButton();
     }
 
-    function applyPlaybackRate() {
+    function forceApplySpeed() {
         if (videoElement && playbackRateReady && targetPlaybackRate > 0) {
             try {
                 videoElement.playbackRate = targetPlaybackRate;
                 getEl('speedIndicator').textContent = targetPlaybackRate.toFixed(1) + 'x';
-            } catch(e) {
-                // Hata durumunda sessizce devam et
-            }
+            } catch(e) {}
         }
+    }
+
+    function scheduleSpeedApply() {
+        if (speedApplyTimer) clearTimeout(speedApplyTimer);
+        speedApplyTimer = setTimeout(function() {
+            forceApplySpeed();
+        }, 1000); // video oynamaya basladiktan 1 saniye sonra uygula
     }
 
     function closePlayerAndGoBack() {
@@ -879,9 +1085,7 @@
             videoElement.src = '';
             videoElement.load();
         }
-        if (window.history && window.history.state && window.history.state.playerOpen) {
-            window.history.back();
-        }
+        if (speedApplyTimer) clearTimeout(speedApplyTimer);
         targetPlaybackRate = 1.0;
         playbackRateReady = false;
         goBack();
@@ -905,20 +1109,15 @@
     function setupPlayerEvents() {
         videoElement = getEl('videoPlayer');
 
-        // Video hazir oldugunda playbackRate uygula
         videoElement.onloadedmetadata = function() {
             playbackRateReady = true;
-            applyPlaybackRate();
-        };
-        videoElement.oncanplay = function() {
-            playbackRateReady = true;
-            applyPlaybackRate();
+            scheduleSpeedApply();
         };
         videoElement.onplaying = function() {
             playbackRateReady = true;
-            applyPlaybackRate();
+            scheduleSpeedApply();
         };
-
+        // ontimeupdate'te periyodik olarak hiz kontrolu (tarayici geri alirsa diye)
         videoElement.ontimeupdate = function() {
             var cur = videoElement.currentTime;
             var dur = videoElement.duration;
@@ -926,6 +1125,12 @@
             if (dur && !isNaN(dur)) {
                 getEl('timeDuration').textContent = formatTime(dur);
                 getEl('progressFill').style.width = ((cur / dur) * 100) + '%';
+            }
+            // Her 5 saniyede bir hiz kontrolu (opsiyonel)
+            if (Math.floor(cur) % 5 === 0 && playbackRateReady && targetPlaybackRate > 0) {
+                if (Math.abs(videoElement.playbackRate - targetPlaybackRate) > 0.01) {
+                    forceApplySpeed();
+                }
             }
         };
         videoElement.onplay = updatePlayPauseButton;
@@ -953,7 +1158,7 @@
             targetPlaybackRate = newRate;
             getEl('speedIndicator').textContent = newRate.toFixed(1) + 'x';
             if (playbackRateReady && videoElement) {
-                try { videoElement.playbackRate = newRate; } catch(e) {}
+                forceApplySpeed();
             }
             showControlsTemporarily();
         };
@@ -977,6 +1182,8 @@
     function bindHomeButtons() {
         getEl('listHomeBtn').onclick = function() {
             historyStack = [];
+            isSearchActive = false;
+            var si = getEl('searchInput'); if (si) si.value = '';
             navigateTo('main_menu', 'mainMenuScreen', false);
         };
         getEl('seasonsHomeBtn').onclick = function() {
@@ -987,67 +1194,55 @@
             historyStack = [];
             navigateTo('main_menu', 'mainMenuScreen', false);
         };
+        getEl('favHomeBtn').onclick = function() {
+            historyStack = [];
+            navigateTo('main_menu', 'mainMenuScreen', false);
+        };
         getEl('seasonsBackBtn').onclick = function() { goBack(); };
         getEl('episodesBackBtn').onclick = function() { goBack(); };
+        getEl('panelSwitchBtn').onclick = function() { logoutToLogin(); };
 
-        // Panel degistirme butonu
-        getEl('panelSwitchBtn').onclick = function() {
-            logoutToLogin();
-        };
+        // Favoriler menü butonu
+        getEl('favMenuBtn').addEventListener('click', function() { onMainMenuClick('fav'); });
     }
 
-    // ==================== KLAVYE / KUMANDA EVENTS ====================
+    // ==================== KLAVYE / KUMANDA ====================
     function bindGlobalKeyboard() {
         window.addEventListener('keydown', function(e) {
             var key = e.keyCode;
 
-            // === PLAYER OZEL TUSLARI ===
             if (currentScreen === 'player') {
-                if (key === 37) { // sol
+                if (key === 37) {
                     if (videoElement) videoElement.currentTime = Math.max(0, videoElement.currentTime - 10);
                     showControlsTemporarily();
-                    e.preventDefault();
-                    return;
-                } else if (key === 39) { // sag
+                    e.preventDefault(); return;
+                } else if (key === 39) {
                     if (videoElement) videoElement.currentTime = Math.min(videoElement.duration, videoElement.currentTime + 10);
                     showControlsTemporarily();
-                    e.preventDefault();
-                    return;
-                } else if (key === 13) { // enter
+                    e.preventDefault(); return;
+                } else if (key === 13) {
                     if (videoElement) {
                         if (videoElement.paused) videoElement.play(); else videoElement.pause();
                         updatePlayPauseButton();
                         showControlsTemporarily();
                     }
-                    e.preventDefault();
-                    return;
-                } else if (key === 27 || key === 461) { // escape veya LG back
+                    e.preventDefault(); return;
+                } else if (key === 27 || key === 461) {
                     closePlayerAndGoBack();
-                    e.preventDefault();
-                    return;
+                    e.preventDefault(); return;
                 }
             }
 
-            // === STANDART KUMANDA YON TUSLARI (TUM EKRANLAR) ===
-            if (key === 38) { // yukari
-                focusNext('up');
-                e.preventDefault();
-            } else if (key === 40) { // asagi
-                focusNext('down');
-                e.preventDefault();
-            } else if (key === 37 && currentScreen !== 'player') { // sol
-                focusNext('left');
-                e.preventDefault();
-            } else if (key === 39 && currentScreen !== 'player') { // sag
-                focusNext('right');
-                e.preventDefault();
-            } else if (key === 27 || key === 461) { // escape veya LG back (player disinda)
+            if (key === 38) { focusNext('up'); e.preventDefault(); }
+            else if (key === 40) { focusNext('down'); e.preventDefault(); }
+            else if (key === 37 && currentScreen !== 'player') { focusNext('left'); e.preventDefault(); }
+            else if (key === 39 && currentScreen !== 'player') { focusNext('right'); e.preventDefault(); }
+            else if (key === 27 || key === 461) {
                 if (currentScreen !== 'login' && currentScreen !== 'main_menu') {
                     goBack();
                     e.preventDefault();
                 }
             } else if (key === 13) {
-                // Enter tusu: odaklanmis elemanin click'ini tetikle
                 var activeEl = document.activeElement;
                 if (activeEl && activeEl !== document.body && activeEl.click) {
                     activeEl.click();
@@ -1057,11 +1252,28 @@
         });
     }
 
+    // Arama input'u icin event
+    function bindSearchEvents() {
+        var searchInput = getEl('searchInput');
+        if (searchInput) {
+            searchInput.oninput = function() {
+                performSearch(this.value);
+            };
+            // Klavye ile yazarken Enter basilirsa arama yapip ilk sonuca odaklansin
+            searchInput.onkeydown = function(e) {
+                if (e.keyCode === 13) {
+                    performSearch(this.value);
+                    setTimeout(autoFocusFirst, 100);
+                }
+            };
+        }
+    }
+
     // ==================== BASLANGIC ====================
     function init() {
+        loadFavorites();
         renderSavedPanels();
 
-        // Login buton
         getEl('loginBtn').addEventListener('click', doLogin);
         var inputs = [getEl('panelNameInput'), getEl('serverInput'), getEl('usernameInput'), getEl('passwordInput')];
         for (var i = 0; i < inputs.length; i++) {
@@ -1070,22 +1282,22 @@
             });
         }
 
-        // Ana menu butonlari
         var menuBtns = document.querySelectorAll('#mainMenuScreen .menu-btn');
         for (var j = 0; j < menuBtns.length; j++) {
             menuBtns[j].addEventListener('click', function() {
                 var target = this.getAttribute('data-target');
-                onMainMenuClick(target);
+                if (target) onMainMenuClick(target);
             });
             menuBtns[j].addEventListener('keydown', function(e) {
                 if (e.keyCode === 13) {
                     var target = this.getAttribute('data-target');
-                    onMainMenuClick(target);
+                    if (target) onMainMenuClick(target);
                 }
             });
         }
 
         bindHomeButtons();
+        bindSearchEvents();
         setupPlayerEvents();
         initPlayerControls();
         bindGlobalKeyboard();
