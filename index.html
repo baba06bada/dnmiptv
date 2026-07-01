@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>BABA ÖZKAN PLAYER</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #0b0c10;
+            color: #c5c6c7;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            font-size: 22px;
+        }
+        button:focus, input:focus, .channel-item:focus, .category-item:focus {
+            outline: none;
+            border: 5px solid #ff0055 !important;
+            background-color: #1f2833 !important;
+            color: #ffffff !important;
+            box-shadow: 0 0 15px #ff0055;
+        }
+        .login-screen {
+            display: block;
+            width: 100%;
+            height: 100%;
+            padding-top: 5vh;
+            text-align: center;
+        }
+        .login-title {
+            font-size: 3rem;
+            color: #4630de;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .login-container {
+            width: 500px;
+            margin: 0 auto;
+            background: #1f2833;
+            padding: 30px;
+            border-radius: 10px;
+        }
+        .login-input {
+            width: 90%;
+            padding: 15px;
+            margin: 10px 0;
+            font-size: 1.2rem;
+            background: #0b0c10;
+            color: #fff;
+            border: 1px solid #45f3ff;
+        }
+        .login-btn {
+            width: 95%;
+            padding: 15px;
+            background: #4630de;
+            color: #fff;
+            font-size: 1.3rem;
+            font-weight: bold;
+            border: none;
+            margin-top: 15px;
+            cursor: pointer;
+        }
+        .panel-list-container {
+            margin-top: 30px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .panel-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #0b0c10;
+            margin: 5px 0;
+            padding: 10px;
+        }
+        .panel-select-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            color: #fff;
+            text-align: left;
+            font-size: 1.1rem;
+            padding: 5px;
+        }
+        .panel-delete-btn {
+            background: #ff0055;
+            color: #fff;
+            border: none;
+            padding: 8px 15px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        .main-screen {
+            display: none;
+            width: 100%;
+            height: 100%;
+        }
+        .app-header {
+            height: 8vh;
+            background: #1f2833;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            border-bottom: 2px solid #4630de;
+        }
+        .app-logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #4630de;
+        }
+        .header-btn {
+            background: #ff0055;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        .menu-grid {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 80vh;
+        }
+        .menu-card {
+            width: 250px;
+            height: 250px;
+            background: #1f2833;
+            margin: 0 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 15px;
+            cursor: pointer;
+            border: 2px solid #45f3ff;
+        }
+        .menu-card span {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+        .content-layout {
+            display: none;
+            width: 100%;
+            height: 92vh;
+        }
+        .sidebar {
+            width: 400px;
+            height: 100%;
+            background: #1f2833;
+            border-right: 2px solid #4630de;
+            float: left;
+        }
+        .search-box-container {
+            padding: 10px;
+            height: 8vh;
+        }
+        .search-input {
+            width: 90%;
+            padding: 10px;
+            font-size: 1rem;
+            background: #0b0c10;
+            color: #fff;
+            border: 1px solid #45f3ff;
+        }
+        .category-list {
+            height: 82vh;
+            overflow-y: auto;
+        }
+        .category-item {
+            width: 100%;
+            padding: 15px;
+            background: none;
+            border: none;
+            color: #c5c6c7;
+            text-align: left;
+            font-size: 1.2rem;
+            border-bottom: 1px solid #0b0c10;
+            cursor: pointer;
+        }
+        .main-content {
+            margin-left: 402px;
+            height: 100%;
+            background: #0b0c10;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        .channel-item {
+            width: 98%;
+            padding: 15px;
+            background: #1f2833;
+            color: #fff;
+            margin-bottom: 8px;
+            text-align: left;
+            font-size: 1.2rem;
+            border: 1px solid #333;
+            cursor: pointer;
+        }
+        .player-screen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 99999;
+        }
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        .player-hud {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(11, 12, 16, 0.85);
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+        .hud-row-top {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .progress-container {
+            width: 100%;
+            height: 12px;
+            background: #333;
+            border-radius: 6px;
+            cursor: pointer;
+            position: relative;
+        }
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background: #ff0055;
+            border-radius: 6px;
+        }
+        .hud-row-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .hud-left {
+            display: flex;
+            align-items: center;
+        }
+        .hud-btn {
+            background: #4630de;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1.1rem;
+            margin-right: 15px;
+            cursor: pointer;
+        }
+        .hud-time {
+            font-size: 1.2rem;
+            color: #fff;
+        }
+        .hud-close-btn {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            background: rgba(255, 0, 85, 0.8);
+            color: #fff;
+            border: none;
+            padding: 15px 25px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 100000;
+        }
+        .error-popup {
+            display: none;
+            position: absolute;
+            top: 30%;
+            left: 10%;
+            width: 80%;
+            background: rgba(255, 0, 55, 0.95);
+            color: #fff;
+            padding: 30px;
+            font-size: 1.4rem;
+            text-align: center;
+            border-radius: 10px;
+            z-index: 100001;
+        }
+        .resume-popup {
+            display: none;
+            position: fixed;
+            top: 35%;
+            left: 25%;
+            width: 50%;
+            background: #1f2833;
+            border: 3px solid #45f3ff;
+            padding: 30px;
+            text-align: center;
+            z-index: 100002;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="screen-login" class="login-screen">
+        <div class="login-title">BABA ÖZKAN PLAYER</div>
+        <div class="login-container">
+            <input type="text" id="input-panel-name" class="login-input" placeholder="Panel Adı (Örn: Ev TV)">
+            <input type="text" id="input-url" class="login-input" placeholder="Sunucu URL (http://domain.com:8080)">
+            <input type="text" id="input-username" class="login-input" placeholder="Kullanıcı Adı">
+            <input type="text" id="input-password" class="login-input" placeholder="Şifre">
+            <button id="btn-login" class="login-btn">GİRİŞ YAP VE KAYDET</button>
+            <div class="panel-list-container" id="saved-panels-list"></div>
+        </div>
+    </div>
+
+    <div id="screen-main" class="main-screen">
+        <div class="app-header">
+            <div class="app-logo">BABA ÖZKAN PLAYER</div>
+            <div>
+                <button id="btn-nav-home" class="header-btn" style="background:#4630de; margin-right:10px; display:none;">🏠 ANA MENÜ</button>
+                <button id="btn-logout" class="header-btn">🔌 PANELDEN ÇIK</button>
+            </div>
+        </div>
+        <div id="main-menu-grid" class="menu-grid">
+            <div class="menu-card" id="menu-live"><span>📺 CANLI TV</span></div>
+            <div class="menu-card" id="menu-vod"><span>🎬 SİNEMA (VOD)</span></div>
+            <div class="menu-card" id="menu-series"><span>🍿 DİZİLER</span></div>
+            <div class="menu-card" id="menu-favs"><span>⭐ FAVORİLERİM</span></div>
+        </div>
+        <div id="layout-content" class="content-layout">
+            <div class="sidebar">
+                <div class="search-box-container">
+                    <input type="text" id="input-search" class="search-input" placeholder="🔍 Ara...">
+                </div>
+İstediğiniz gibi tüm özellikleri barındıran, araya açıklama eklenmemiş, tek parça halinde çalışan eksiksiz index.html kodu aşağıdadır. Bu kodu GitHub'daki dosyanıza yapıştırarak kullanabilirsiniz.
+
+<!DOCTYPE html> <html lang="tr"> <head> <meta charset="UTF-8"> <title>BABA ÖZKAN PLAYER</title> <style> body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #0b0c10; color: #c5c6c7; font-family: Arial, sans-serif; overflow: hidden; font-size: 22px; } button:focus, input:focus, .channel-item:focus, .category-item:focus { outline: none; border: 5px solid #ff0055 !important; background-color: #1f2833 !important; color: #ffffff !important; box-shadow: 0 0 15px #ff0055; } .login-screen { display: block; width: 100%; height: 100%; padding-top: 5vh; text-align: center; } .login-title { font-size: 3rem; color: #4630de; margin-bottom: 20px; font-weight: bold; } .login-container { width: 500px; margin: 0 auto; background: #1f2833; padding: 30px; border-radius: 10px; } .login-input { width: 90%; padding: 15px; margin: 10px 0; font-size: 1.2rem; background: #0b0c10; color: #fff; border: 1px solid #45f3ff; } .login-btn { width: 95%; padding: 15px; background: #4630de; color: #fff; font-size: 1.3rem; font-weight: bold; border: none; margin-top: 15px; cursor: pointer; } .panel-list-container { margin-top: 30px; max-height: 200px; overflow-y: auto; } .panel-row { display: flex; justify-content: space-between; align-items: center; background: #0b0c10; margin: 5px 0; padding: 10px; } .panel-select-btn { flex: 1; background: none; border: none; color: #fff; text-align: left; font-size: 1.1rem; padding: 5px; } .panel-delete-btn { background: #ff0055; color: #fff; border: none; padding: 8px 15px; font-size: 1rem; cursor: pointer; } .main-screen { display: none; width: 100%; height: 100%; } .app-header { height: 8vh; background: #1f2833; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; border-bottom: 2px solid #4630de; } .app-logo { font-size: 1.8rem; font-weight: bold; color: #4630de; } .header-btn { background: #ff0055; color: #fff; border: none; padding: 10px 20px; font-size: 1rem; cursor: pointer; } .menu-grid { display: flex; justify-content: center; align-items: center; height: 80vh; } .menu-card { width: 250px; height: 250px; background: #1f2833; margin: 0 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; border-radius: 15px; cursor: pointer; border: 2px solid #45f3ff; } .menu-card span { font-size: 1.4rem; font-weight: bold; margin-top: 15px; } .content-layout { display: none; width: 100%; height: 92vh; } .sidebar { width: 400px; height: 100%; background: #1f2833; border-right: 2px solid #4630de; float: left; } .search-box-container { padding: 10px; height: 8vh; } .search-input { width: 90%; padding: 10px; font-size: 1rem; background: #0b0c10; color: #fff; border: 1px solid #45f3ff; } .category-list { height: 82vh; overflow-y: auto; } .category-item { width: 100%; padding: 15px; background: none; border: none; color: #c5c6c7; text-align: left; font-size: 1.2rem; border-bottom: 1px solid #0b0c10; cursor: pointer; } .main-content { margin-left: 402px; height: 100%; background: #0b0c10; overflow-y: auto; padding: 10px; } .channel-item { width: 98%; padding: 15px; background: #1f2833; color: #fff; margin-bottom: 8px; text-align: left; font-size: 1.2rem; border: 1px solid #333; cursor: pointer; } .player-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 99999; } video { width: 100%; height: 100%; object-fit: contain; } .player-hud { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(11, 12, 16, 0.85); padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; } .hud-row-top { width: 100%; margin-bottom: 10px; } .progress-container { width: 100%; height: 12px; background: #333; border-radius: 6px; cursor: pointer; position: relative; } .progress-bar { width: 0%; height: 100%; background: #ff0055; border-radius: 6px; } .hud-row-bottom { display: flex; justify-content: space-between; align-items: center; } .hud-left { display: flex; align-items: center; } .hud-btn { background: #4630de; color: #fff; border: none; padding: 10px 20px; font-size: 1.1rem; margin-right: 15px; cursor: pointer; } .hud-time { font-size: 1.2rem; color: #fff; } .hud-close-btn { position: absolute; top: 30px; left: 30px; background: rgba(255, 0, 85, 0.8); color: #fff; border: none; padding: 15px 25px; font-size: 1.2rem; font-weight: bold; cursor: pointer; z-index: 100000; } .error-popup { display: none; position: absolute; top: 30%; left: 10%; width: 80%; background: rgba(255, 0, 55, 0.95); color: #fff; padding: 30px; font-size: 1.4rem; text-align: center; border-radius: 10px; z-index: 100001; } .resume-popup { display: none; position: fixed; top: 35%; left: 25%; width: 50%; background: #1f2833; border: 3px solid #45f3ff; padding: 30px; text-align: center; z-index: 100002; } </style> </head> <body> <div id="screen-login" class="login-screen"> <div class="login-title">BABA ÖZKAN PLAYER</div> <div class="login-container"> <input type="text" id="input-panel-name" class="login-input" placeholder="Panel Adı (Örn: Ev TV)"> <input type="text" id="input-url" class="login-input" placeholder="Sunucu URL (http://domain.com:8080)"> <input type="text" id="input-username" class="login-input" placeholder="Kullanıcı Adı"> <input type="text" id="input-password" class="login-input" placeholder="Şifre"> <button id="btn-login" class="login-btn">GİRİŞ YAP VE KAYDET</button> <div class="panel-list-container" id="saved-panels-list"></div> </div> </div> <div id="screen-main" class="main-screen"> <div class="app-header"> <div class="app-logo">BABA ÖZKAN PLAYER</div> <div> <button id="btn-nav-home" class="header-btn" style="background:#4630de; margin-right:10px; display:none;">🏠 ANA MENÜ</button> <button id="btn-logout" class="header-btn">🔌 PANELDEN ÇIK</button> </div> </div> <div id="main-menu-grid" class="menu-grid"> <div class="menu-card" id="menu-live"><span>📺 CANLI TV</span></div> <div class="menu-card" id="menu-vod"><span>🎬 SİNEMA (VOD)</span></div> <div class="menu-card" id="menu-series"><span>🍿 DİZİLER</span></div> <div class="menu-card" id="menu-favs"><span>⭐ FAVORİLERİM</span></div> </div> <div id="layout-content" class="content-layout"> <div class="sidebar"> <div class="search-box-container"> <input type="text" id="input-search" class="search-input" placeholder="🔍 Ara..."> </div> 
+
+
+
+
+
+
+⬅ KANAL LİSTESİNE DÖN
+
+
+
+
+
+
+
+
+
+
+⏸ DURDUR
+⚡ HIZ: 1.0x
+00:00 / 00:00
+
+
+
+
+Bu içeriği daha önce izlemişsiniz.
+▶ Kaldığı Yerden Devam Et
+🔄 Baştan Başlat
+
+
+var XTREAM_URL = "";
+var USERNAME = "";
+var PASSWORD = "";
+var currentScreen = "login";
+var currentCategoryType = "";
+var currentCategoryId = "";
+var allStreamsData = [];
+var filteredStreamsData = [];
+var numberBuffer = "";
+var numberTimer = null;
+var hudTimer = null;
+var savedPlaybackSpeed = 1.0;
+var resumeTargetId = "";
+var resumeTargetUrl = "";
+var resumeTargetTime = 0;
+var PROXY_URL = "allorigins.win";
+
+document.addEventListener("DOMContentLoaded", function() {
+initApp();
+});
+
+function initApp() {
+setupEventListeners();
+renderSavedPanels();
+var lastActive = localStorage.getItem("iptv_last_active_panel");
+if (lastActive) {
+var panels = JSON.parse(localStorage.getItem("iptv_panels") || "[]");
+for (var i = 0; i < panels.length; i++) {
+if (panels[i].id === lastActive) {
+loginWithPanelData(panels[i]);
+return;
+}
+}
+}
+showScreen("login");
+}
+
+function setupEventListeners() {
+document.getElementById("btn-login").onclick = function() {
+var name = document.getElementById("input-panel-name").value.trim();
+var url = document.getElementById("input-url").value.trim();
+var user = document.getElementById("input-username").value.trim();
+var pass = document.getElementById("input-password").value.trim();
+if (!name || !url || !user || !pass) {
+alert("Lütfen tüm alanları doldurun!");
+return;
+}
+var newPanel = { id: "panel_" + new Date().getTime(), name: name, url: url, username: user, password: pass };
+var panels = JSON.parse(localStorage.getItem("iptv_panels") || "[]");
+panels.push(newPanel);
+localStorage.setItem("iptv_panels", JSON.stringify(panels));
+loginWithPanelData(newPanel);
+};
+document.getElementById("btn-logout").onclick = function() {
+localStorage.removeItem("iptv_last_active_panel");
+document.getElementById("main-video-element").src = "";
+renderSavedPanels();
+showScreen("login");
+};
+document.getElementById("btn-nav-home").onclick = function() { showScreen("main_menu"); };
+document.getElementById("menu-live").onclick = function() { loadCategoryType("live"); };
+document.getElementById("menu-vod").onclick = function() { loadCategoryType("vod"); };
+document.getElementById("menu-series").onclick = function() { loadCategoryType("series"); };
+document.getElementById("menu-favs").onclick = function() { loadFavoritesMenu(); };
+document.getElementById("btn-player-close").onclick = function() { closeVideoPlayer(); };
+document.getElementById("btn-hud-play").onclick = function() { toggleVideoPlay(); };
+document.getElementById("btn-hud-speed").onclick = function() { changePlaybackSpeed(); };
+document.getElementById("input-search").oninput = function(e) { filterStreams(e.target.value); };
+document.getElementById("btn-resume-yes").onclick = function() {
+document.getElementById("popup-resume").style.display = "none";
+startVideoPlayback(true);
+};
+document.getElementById("btn-resume-no").onclick = function() {
+document.getElementById("popup-resume").style.display = "none";
+startVideoPlayback(false);
+};
+document.getElementById("hud-progress-container").onclick = function(e) {
+var rect = this.getBoundingClientRect();
+var clickX = e.clientX - rect.left;
+var video = document.getElementById("main-video-element");
+if (video && video.duration) { video.currentTime = (clickX / rect.width) * video.duration; }
+};
+document.addEventListener("keydown", handleGlobalKeyDown);
+var video = document.getElementById("main-video-element");
+video.onloadedmetadata = function() { updateHudTime(); };
+video.ontimeupdate = function() { updateHudTime(); savePlaybackPosition(); };
+video.onplaying = function() {
+var vid = this;
+setTimeout(function() { vid.playbackRate = savedPlaybackSpeed; }, 1000);
+};
+video.onerror = function() {
+var popup = document.getElementById("popup-error");
+popup.innerHTML = "⚠️ YAYIN HATASI: Bu video formatı (H.265/4K) televizyonunuzun eski donanımı tarafından desteklenmiyor olabilir. Lütfen H.264 formatı talep edin.";
+popup.style.display = "block";
+};
+}
+
+function loginWithPanelData(panel) {
+XTREAM_URL = panel.url; USERNAME = panel.username; PASSWORD = panel.password;
+localStorage.setItem("iptv_last_active_panel", panel.id);
+showScreen("main_menu");
+}
+
+function renderSavedPanels() {
+var container = document.getElementById("saved-panels-list"); container.innerHTML = "";
+var panels = JSON.parse(localStorage.getItem("iptv_panels") || "[]");
+if (panels.length === 0) {
+container.innerHTML = "Henüz kayıtlı panel yok.";
+return;
+}
+for (var i = 0; i < panels.length; i++) {
+(function(panel) {
+var row = document.createElement("div"); row.className = "panel-row";
+var selectBtn = document.createElement("button"); selectBtn.className = "panel-select-btn"; selectBtn.innerHTML = "🔌 " + panel.name;
+selectBtn.onclick = function() { loginWithPanelData(panel); };
+var delBtn = document.createElement("button"); delBtn.className = "panel-delete-btn"; delBtn.innerHTML = "❌ SİL";
+delBtn.onclick = function(e) { e.stopPropagation(); deletePanel(panel.id); };
+row.appendChild(selectBtn); row.appendChild(delBtn); container.appendChild(row);
+})(panels[i]);
+}
+}
+
+function deletePanel(id) {
+var panels = JSON.parse(localStorage.getItem("iptv_panels") || "[]"); var updated = [];
+for (var i = 0; i < panels.length; i++) { if (panels[i].id !== id) { updated.push(panels[i]); } }
+localStorage.setItem("iptv_panels", JSON.stringify(updated));
+if (localStorage.getItem("iptv_last_active_panel") === id) { localStorage.removeItem("iptv_last_active_panel"); }
+renderSavedPanels();
+}
+
+function showScreen(screenName) {
+currentScreen = screenName;
+document.getElementById("screen-login").style.display = "none";
+document.getElementById("screen-main").style.display = "none";
+document.getElementById("screen-player").style.display = "none";
+document.getElementById("main-menu-grid").style.display = "none";
+document.getElementById("layout-content").style.display = "none";
+document.getElementById("btn-nav-home").style.display = "none";
+if (screenName === "login") { document.getElementById("screen-login").style.display = "block"; }
+else if (screenName === "main_menu") { document.getElementById("screen-main").style.display = "block"; document.getElementById("main-menu-grid").style.display = "flex"; }
+else { document.getElementById("screen-main").style.display = "block"; document.getElementById("layout-content").style.display = "block"; document.getElementById("btn-nav-home").style.display = "block"; }
+}
+
+function loadCategoryType(type) {
+currentCategoryType = type; document.getElementById("input-search").value = ""; showScreen(type);
+var action = "get_live_categories";
+if (type === "vod") action = "get_vod_categories";
+if (type === "series") action = "get_series_categories";
+var url = PROXY_URL + encodeURIComponent(XTREAM_URL + "/player_api.php?username=" + USERNAME + "&password=" + PASSWORD + "&action=" + action);
+var xhr = new XMLHttpRequest(); xhr.open("GET", url, true);
+xhr.onreadystatechange = function() { if (xhr.readyState === 4 && xhr.status === 200) { renderCategories(JSON.parse(xhr.responseText)); } };
+xhr.send();
+}
+
+function renderCategories(categories) {
+var container = document.getElementById("list-categories"); container.innerHTML = "";
+var firstCatBtn = document.createElement("button"); firstCatBtn.className = "category-item"; firstCatBtn.innerHTML = "🔌 PANELLERİM / ÇIKIŞ";
+firstCatBtn.onclick = function() { showScreen("login"); }; container.appendChild(firstCatBtn);
+for (var i = 0; i < categories.length; i++) {
+(function(cat) {
+var btn = document.createElement("button"); btn.className = "category-item"; btn.innerHTML = cat.category_name;
+btn.onclick = function() { loadStreams(cat.category_id); }; container.appendChild(btn);
+})(categories[i]);
+}
+}
+
+function loadStreams(categoryId) {
+currentCategoryId = categoryId; var action = "get_live_streams";
+if (currentCategoryType === "vod") action = "get_vod_streams";
+if (currentCategoryType === "series") action = "get_series";
+var url = PROXY_URL + encodeURIComponent(XTREAM_URL + "/player_api.php?username=" + USERNAME + "&password=" + PASSWORD + "&action=" + action + "&category_id=" + categoryId);
+var xhr = new XMLHttpRequest(); xhr.open("GET", url, true);
+xhr.onreadystatechange = function() { if (xhr.readyState === 4 && xhr.status === 200) { allStreamsData = JSON.parse(xhr.responseText); filterStreams(""); } };
+xhr.send();
+}
+
+function filterStreams(query) {
+query = query.toLowerCase(); filteredStreamsData = []; var count = 0;
+for (var i = 0; i < allStreamsData.length; i++) {
+var name = (allStreamsData[i].name || allStreamsData[i].num || "").toString().toLowerCase();
+if (name.indexOf(query) !== -1) { filteredStreamsData.push(allStreamsData[i]); count++; if (count >= 40) break; }
+}
+renderStreamsList();
+}
+
+function renderStreamsList() {
+var container = document.getElementById("list-streams"); container.innerHTML = "";
+for (var i = 0; i < filteredStreamsData.length; i++) {
+(function(item, idx) {
+var row = document.createElement("div"); row.style.display = "flex"; row.style.marginBottom = "5px";
+var btn = document.createElement("button"); btn.className = "channel-item"; btn.style.flex = "1"; btn.innerHTML = "(" + (idx + 1) + ") " + item.name;
+btn.onclick = function() { handleStreamClick(item); };
+var favBtn = document.createElement("button"); favBtn.innerHTML = isFavorite(item) ? "⭐" : "☆"; favBtn.style.width = "60px"; favBtn.style.fontSize = "1.5rem"; favBtn.style.background = "#1f2833"; favBtn.style.color = "#fff"; favBtn.style.border = "1px solid #333";
+favBtn.onclick = function(e) { e.stopPropagation(); toggleFavorite(item); favBtn.innerHTML = isFavorite(item) ? "⭐" : "☆"; };
+row.appendChild(btn); row.appendChild(favBtn); container.appendChild(row);
+})(filteredStreamsData[i], i);
+}
+}
+
+function handleStreamClick(item) {
+if (currentCategoryType === "live") { playVideoUrl(XTREAM_URL + "/live/" + USERNAME + "/" + PASSWORD + "/" + item.stream_id + ".ts"); }
+else if (currentCategoryType === "vod") {
+var ext = item.container_extension || "mp4";
+var url = XTREAM_URL + "/movie/" + USERNAME + "/" + PASSWORD + "/" + item.stream_id + "." + ext;
+checkResumeAndPlay(item.stream_id, url);
+} else if (currentCategoryType === "series") { loadSeriesDetails(item.series_id); }
+}
+
+function loadSeriesDetails(seriesId) {
+var url = PROXY_URL + encodeURIComponent(XTREAM_URL + "/player_api.php?username=" + USERNAME + "&password=" + PASSWORD + "&action=get_series_info&series_id=" + seriesId);
+var xhr = new XMLHttpRequest(); xhr.open("GET", url, true);
+xhr.onreadystatechange = function() { if (xhr.readyState === 4 && xhr.status === 200) { renderSeasons(JSON.parse(xhr.responseText)); } };
+xhr.send();
+}
+
+function renderSeasons(data) {
+var container = document.getElementById("list-streams"); container.innerHTML = "";
+var header = document.createElement("h3"); header.innerHTML = "🎬 Sezon Seçin"; header.style.color = "#ff0055"; container.appendChild(header);
+for (var seasonNum in data.episodes) {
+(function(sNum, episodesList) {
+var btn = document.createElement("button"); btn.className = "channel-item"; btn.innerHTML = "🍿 " + sNum + ". Sezon";
+btn.onclick = function() { renderEpisodes(episodesList); }; container.appendChild(btn);
+})(seasonNum, data.episodes[seasonNum]);
+}
+}
+
+function renderEpisodes(episodesList) {
+var container = document.getElementById("list-streams"); container.innerHTML = "";
+var header = document.createElement("h3"); header.innerHTML = "🍿 Bölüm Seçin"; header.style.color = "#45f3ff"; container.appendChild(header);
+for (var i = 0; i < episodesList.length; i++) {
+(function(ep) {
+var btn = document.createElement("button"); btn.className = "channel-item"; btn.innerHTML = "▶ Bölüm " + (ep.episode_num || (i+1)) + ": " + (ep.title || "Dizi Bölümü");
+btn.onclick = function() {
+var ext = ep.container_extension || "mp4";
+var url = XTREAM_URL + "/series/" + USERNAME + "/" + PASSWORD + "/" + ep.id + "." + ext;
+checkResumeAndPlay(ep.id, url);
+};
+container.appendChild(btn);
+})(episodesList[i]);
+}
+}
+
+function checkResumeAndPlay(id, url) {
+resumeTargetId = id; resumeTargetUrl = url;
+var savedTime = localStorage.getItem("resume_" + id);
+if (savedTime && parseFloat(savedTime) > 10) {
+resumeTargetTime = parseFloat(savedTime); document.getElementById("popup-resume").style.display = "block";
+} else { resumeTargetTime = 0; startVideoPlayback(false); }
+}
+
+function startVideoPlayback(resume) {
+var video = document.getElementById("main-video-element"); document.getElementById("popup-error").style.display = "none";
+showScreen("player"); video.src = resumeTargetUrl; video.load();
+if (resume && resumeTargetTime > 0) { video.currentTime = resumeTargetTime; }
+video.play(); showHudTemporarily();
+}
+
+function playVideoUrl(url) {
+document.getElementById("popup-error").style.display = "none"; showScreen("player");
+var video = document.getElementById("main-video-element"); video.src = url; video.load(); video.play(); showHudTemporarily();
+}
+
+function closeVideoPlayer() {
+var video = document.getElementById("main-video-element"); video.pause(); video.src = "";
+showScreen(currentCategoryType || "main_menu");
+}
+
+function toggleVideoPlay() {
+var video = document.getElementById("main-video-element"); var btn = document.getElementById("btn-hud-play");
+if (video.paused) { video.play(); btn.innerHTML = "⏸ DURDUR"; } else { video.pause(); btn.innerHTML = "▶ BAŞLAT"; }
+}
+
+function changePlaybackSpeed() {
+var video = document.getElementById("main-video-element");
+if (savedPlaybackSpeed === 1.0) savedPlaybackSpeed = 1.5; else if (savedPlaybackSpeed === 1.5) savedPlaybackSpeed = 2.0; else savedPlaybackSpeed = 1.0;
+video.playbackRate = savedPlaybackSpeed; document.getElementById("btn-hud-speed").innerHTML = "⚡ HIZ: " + savedPlaybackSpeed + "x";
+}
+
+function formatTime(seconds) {
+if (isNaN(seconds)) return "00:00"; var hrs = Math.floor(seconds / 3600); var mins = Math.floor((seconds % 3600) / 60); var secs = Math.floor(seconds % 60);
+var res = ""; if (hrs > 0) { res += (hrs < 10 ? "0" + hrs : hrs) + ":"; }
+res += (mins < 10 ? "0" + mins : mins) + ":"; res += (secs < 10 ? "0" + secs : secs); return res;
+}
+
+function updateHudTime() {
+var video = document.getElementById("main-video-element");
+
+
