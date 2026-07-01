@@ -227,21 +227,49 @@
             padding: 12px 22px; font-size: 24px; cursor: pointer; border-radius: 6px; margin: 20px;
         }
 
-        /* ========== PLAYER ========== */
-        #playerScreen.active { background: #000; justify-content: center; align-items: center; }
-        #videoPlayer { width: 100%; height: 100%; object-fit: contain; background: #000; }
-        .player-container { position: relative; width: 100%; height: 100%; }
+        /* ========== PLAYER (KRİTİK DÜZELTME) ========== */
+        #playerScreen {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            z-index: 9999 !important;
+            background: #000 !important;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        #playerScreen.active {
+            display: flex !important;
+        }
+        #videoPlayer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: contain;
+            background: #000;
+            z-index: 10;
+        }
+        .player-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
         .back-btn {
             position: absolute; top: 20px; left: 20px;
             background: rgba(0,0,0,0.7); color: #f0c040; border: 3px solid #f0c040;
-            padding: 16px 26px; font-size: 27px; cursor: pointer; z-index: 20; border-radius: 6px;
+            padding: 16px 26px; font-size: 27px; cursor: pointer; z-index: 30; border-radius: 6px;
             display: none;
         }
         .player-container.show-controls .back-btn { display: block; }
         .video-controls {
             position: absolute; bottom: 0; left: 0; width: 100%;
             background: linear-gradient(transparent, rgba(0,0,0,0.9));
-            padding: 24px 18px 18px; display: none; z-index: 15; flex-direction: column;
+            padding: 24px 18px 18px; display: none; z-index: 25; flex-direction: column;
         }
         .player-container.show-controls .video-controls { display: flex; }
         .progress-row { display: flex; align-items: center; margin-bottom: 14px; }
@@ -262,13 +290,13 @@
         .error-overlay {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: rgba(0,0,0,0.85); color: #ff5c5c; padding: 40px 50px; font-size: 28px;
-            border-radius: 12px; z-index: 25; display: none; text-align: center;
+            border-radius: 12px; z-index: 50; display: none; text-align: center;
             max-width: 85%; line-height: 1.5; border: 3px solid #ff5c5c;
         }
         .resume-popup {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: rgba(20,20,20,0.95); border: 4px solid #f0c040; border-radius: 14px;
-            padding: 35px 45px; z-index: 30; display: none; flex-direction: column;
+            padding: 35px 45px; z-index: 60; display: none; flex-direction: column;
             align-items: center; text-align: center; min-width: 500px; max-width: 80%;
         }
         .resume-popup.active { display: flex; }
@@ -282,7 +310,7 @@
         .channel-number {
             position: absolute; bottom: 120px; right: 30px;
             background: rgba(0,0,0,0.7); color: #f0c040; font-size: 60px;
-            padding: 15px 25px; border-radius: 10px; z-index: 22; display: none;
+            padding: 15px 25px; border-radius: 10px; z-index: 55; display: none;
             border: 2px solid #f0c040;
         }
     </style>
@@ -366,7 +394,7 @@
         <button class="back-btn-text" id="episodesBackBtn" tabindex="0">⬅ SEZONLARA DÖN</button>
     </div>
 
-    <!-- ==================== PLAYER ==================== -->
+    <!-- ==================== PLAYER (SABİT, EN ÜST KATMAN) ==================== -->
     <div id="playerScreen" class="screen">
         <div class="player-container" id="playerContainer">
             <button class="back-btn" id="playerBackBtn" tabindex="0">⬅ KANAL LİSTESİNE DÖN</button>
@@ -432,12 +460,10 @@
 
     var favorites = [];
 
-    // Resume (kaldığı yerden devam) değişkenleri
     var resumeData = {};
     var currentResumeKey = "";
     var pendingResumeCallback = null;
 
-    // Kanal numarası buffer
     var channelBuffer = "";
     var channelBufferTimeout = null;
     var lastChannelBufferTime = 0;
@@ -459,8 +485,22 @@
         var screens = document.querySelectorAll('.screen');
         for (var i = 0; i < screens.length; i++) {
             screens[i].classList.remove('active');
+            // Player dışındaki ekranları agresif gizle
+            if (screens[i].id !== 'playerScreen') {
+                screens[i].style.display = 'none';
+            }
         }
-        getEl(screenId).classList.add('active');
+        var target = getEl(screenId);
+        target.classList.add('active');
+        if (screenId === 'playerScreen') {
+            target.style.display = 'flex';
+        } else {
+            target.style.display = 'flex';
+            // Player'ı kesinlikle gizle
+            var player = getEl('playerScreen');
+            player.classList.remove('active');
+            player.style.display = 'none';
+        }
     }
 
     function navigateTo(screen, screenId, pushHistory) {
@@ -602,8 +642,6 @@
             }
         }
         savePanelsToStorage(newPanels);
-
-        // Eğer silinen panel son aktif panel ise, onu da temizle
         var lastActive = getLastActivePanel();
         if (lastActive && lastActive.name === panelName) {
             clearLastActivePanel();
@@ -627,31 +665,18 @@
             (function(panel) {
                 var row = document.createElement('div');
                 row.className = 'saved-panel-row';
-
                 var nameDiv = document.createElement('div');
                 nameDiv.className = 'saved-panel-item';
                 nameDiv.setAttribute('tabindex', '0');
                 nameDiv.textContent = panel.name + ' (' + panel.server + ')';
-                nameDiv.onclick = function() {
-                    selectSavedPanel(panel);
-                };
+                nameDiv.onclick = function() { selectSavedPanel(panel); };
                 nameDiv.onkeydown = function(e) { if (e.keyCode === 13) selectSavedPanel(panel); };
-
                 var deleteBtn = document.createElement('button');
                 deleteBtn.className = 'delete-panel-btn';
                 deleteBtn.setAttribute('tabindex', '0');
                 deleteBtn.textContent = '❌ SİL';
-                deleteBtn.onclick = function(e) {
-                    e.stopPropagation();
-                    deletePanel(panel.name);
-                };
-                deleteBtn.onkeydown = function(e) {
-                    if (e.keyCode === 13) {
-                        e.stopPropagation();
-                        deletePanel(panel.name);
-                    }
-                };
-
+                deleteBtn.onclick = function(e) { e.stopPropagation(); deletePanel(panel.name); };
+                deleteBtn.onkeydown = function(e) { if (e.keyCode === 13) { e.stopPropagation(); deletePanel(panel.name); } };
                 row.appendChild(nameDiv);
                 row.appendChild(deleteBtn);
                 container.appendChild(row);
@@ -674,9 +699,7 @@
         try { favorites = JSON.parse(favStr) || []; } catch(e) { favorites = []; }
     }
 
-    function saveFavorites() {
-        localStorage.setItem('iptv_favorites', JSON.stringify(favorites));
-    }
+    function saveFavorites() { localStorage.setItem('iptv_favorites', JSON.stringify(favorites)); }
 
     function isFavorite(type, item) {
         var id = item.stream_id || item.series_id || item.id || '';
@@ -721,9 +744,7 @@
         try { resumeData = JSON.parse(str) || {}; } catch(e) { resumeData = {}; }
     }
 
-    function saveResumeData() {
-        localStorage.setItem('iptv_resume', JSON.stringify(resumeData));
-    }
+    function saveResumeData() { localStorage.setItem('iptv_resume', JSON.stringify(resumeData)); }
 
     function getResumeKey(type, item) {
         if (type === 'vod') return 'vod_' + (item.stream_id || '');
@@ -731,16 +752,11 @@
         return 'live_' + (item.stream_id || '');
     }
 
-    function getResumeTime(key) {
-        return resumeData[key] || 0;
-    }
+    function getResumeTime(key) { return resumeData[key] || 0; }
 
     function setResumeTime(key, seconds) {
-        if (seconds > 5) {
-            resumeData[key] = Math.floor(seconds);
-        } else {
-            delete resumeData[key];
-        }
+        if (seconds > 5) { resumeData[key] = Math.floor(seconds); }
+        else { delete resumeData[key]; }
         saveResumeData();
     }
 
@@ -749,11 +765,7 @@
         var panelInfo = { name: panelName, server: server, username: user, password: pass };
         localStorage.setItem('last_active_panel', JSON.stringify(panelInfo));
     }
-
-    function clearLastActivePanel() {
-        localStorage.removeItem('last_active_panel');
-    }
-
+    function clearLastActivePanel() { localStorage.removeItem('last_active_panel'); }
     function getLastActivePanel() {
         var str = localStorage.getItem('last_active_panel');
         if (!str) return null;
@@ -764,38 +776,28 @@
         var panel = getLastActivePanel();
         if (!panel) return false;
         if (!panel.server || !panel.username || !panel.password) return false;
-
         var server = panel.server;
         if (server.charAt(server.length - 1) === '/') server = server.slice(0, -1);
         XTREAM_URL = server;
         API_BASE_URL = server + '/player_api.php?username=' + encodeURIComponent(panel.username) + '&password=' + encodeURIComponent(panel.password);
-        USERNAME = panel.username;
-        PASSWORD = panel.password;
-        CURRENT_PANEL_NAME = panel.name || '';
-
+        USERNAME = panel.username; PASSWORD = panel.password; CURRENT_PANEL_NAME = panel.name || '';
         var errorEl = getEl('loginError');
         if (errorEl) errorEl.textContent = 'Otomatik giriş yapılıyor...';
-
         ajaxGet(API_BASE_URL, function(data) {
             if (data.user_info && data.user_info.auth === 1) {
                 if (errorEl) errorEl.textContent = '';
-                loadFavorites();
-                loadResumeData();
+                loadFavorites(); loadResumeData();
                 historyStack = [];
                 navigateTo('main_menu', 'mainMenuScreen', false);
             } else {
                 clearLastActivePanel();
                 if (errorEl) errorEl.textContent = '';
-                showScreen('loginScreen');
-                renderSavedPanels();
-                setTimeout(autoFocusFirst, 150);
+                showScreen('loginScreen'); renderSavedPanels(); setTimeout(autoFocusFirst, 150);
             }
         }, function(err) {
             clearLastActivePanel();
             if (errorEl) errorEl.textContent = '';
-            showScreen('loginScreen');
-            renderSavedPanels();
-            setTimeout(autoFocusFirst, 150);
+            showScreen('loginScreen'); renderSavedPanels(); setTimeout(autoFocusFirst, 150);
         });
         return true;
     }
@@ -819,8 +821,7 @@
                 savePanel(panelName, server, user, pass);
                 saveLastActivePanel(panelName, server, user, pass);
                 errorEl.textContent = '';
-                loadFavorites();
-                loadResumeData();
+                loadFavorites(); loadResumeData();
                 historyStack = [];
                 navigateTo('main_menu', 'mainMenuScreen', false);
             } else { errorEl.textContent = 'Giriş başarısız!'; }
@@ -1189,6 +1190,10 @@
         getEl('channelNumberDisplay').style.display = 'none';
         pendingResumeCallback = null;
         currentResumeKey = '';
+        // Player'ı tamamen gizle
+        var player = getEl('playerScreen');
+        player.classList.remove('active');
+        player.style.display = 'none';
     }
 
     function closePlayerAndGoBack() {
@@ -1265,9 +1270,7 @@
     // ==================== KANAL NUMARASI BUFFER ====================
     function handleDigitKey(digit) {
         var now = Date.now();
-        if (now - lastChannelBufferTime > 1500) {
-            channelBuffer = "";
-        }
+        if (now - lastChannelBufferTime > 1500) { channelBuffer = ""; }
         lastChannelBufferTime = now;
         channelBuffer += digit;
         var display = getEl('channelNumberDisplay');
@@ -1287,9 +1290,7 @@
                     }
                 } else if (currentScreen === 'list' && currentListType === 'live') {
                     var channel = findChannelByNumber(targetNum);
-                    if (channel) {
-                        onStreamClick(channel, targetNum);
-                    }
+                    if (channel) { onStreamClick(channel, targetNum); }
                 }
             }
         }, 1200);
